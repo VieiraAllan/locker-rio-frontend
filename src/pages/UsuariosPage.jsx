@@ -38,18 +38,18 @@ function UsuariosPage({ showToast, usuarioAtual }) {
   const podeGerenciar = podeGerenciarUsuarios(usuarioAtual);
 
   const usuariosVisiveis = useMemo(() => {
-    return filtrarUsuariosVisiveis(usuarioAtual, usuarios);
-  }, [usuarios]);
+  return filtrarUsuariosVisiveis(usuarioAtual, usuarios);
+}, [usuarioAtual, usuarios]);
 
   const perfisDisponiveisParaCriacao = useMemo(() => {
-    return [
-      perfis.ATENDENTE,
-      perfis.GERENTE,
-      perfis.ADMIN
-    ].filter(perfil =>
-      podeCriarUsuarioComPerfil(usuarioAtual, perfil)
-    );
-  }, []);
+  return [
+    perfis.ATENDENTE,
+    perfis.GERENTE,
+    perfis.ADMIN
+  ].filter(perfil =>
+    podeCriarUsuarioComPerfil(usuarioAtual, perfil)
+  );
+}, [usuarioAtual]);
 
   const totalUsuariosVisiveis = usuariosVisiveis.length;
 
@@ -65,7 +65,7 @@ function UsuariosPage({ showToast, usuarioAtual }) {
     try {
       setLoading(true);
 
-      const dados = await getUsuarios(usuarioAtual.id);
+      const dados = await getUsuarios();
 
       setUsuarios(dados);
     } catch (err) {
@@ -151,28 +151,27 @@ function UsuariosPage({ showToast, usuarioAtual }) {
       setSubmitting(true);
 
       if (usuarioEditando) {
-        const usuarioAtualizado = await atualizarUsuarioApi(
-          usuarioAtual.id,
-          usuarioEditando.id,
-          {
-            nome: formNome.trim(),
-            email: formEmail.trim(),
-            perfil: formPerfil,
-            ativo: formAtivo
-          }
-        );
+  const usuarioAtualizado = await atualizarUsuarioApi(
+    usuarioEditando.id,
+    {
+      nome: formNome.trim(),
+      email: formEmail.trim(),
+      perfil: formPerfil,
+      ativo: formAtivo
+    }
+  );
 
-        setUsuarios(prev =>
-          prev.map(usuario =>
-            usuario.id === usuarioAtualizado.id
-              ? usuarioAtualizado
-              : usuario
-          )
-        );
+  setUsuarios(prev =>
+    prev.map(usuario =>
+      usuario.id === usuarioAtualizado.id
+        ? usuarioAtualizado
+        : usuario
+    )
+  );
 
-        showToast('Usuário atualizado com sucesso.', 'success');
-      } else {
-        const novoUsuario = await criarUsuarioApi(usuarioAtual.id, {
+  showToast('Usuário atualizado com sucesso.', 'success');
+} else {
+        const novoUsuario = await criarUsuarioApi({
           nome: formNome.trim(),
           email: formEmail.trim(),
           perfil: formPerfil,
@@ -193,37 +192,36 @@ function UsuariosPage({ showToast, usuarioAtual }) {
   }
 
   async function alternarStatusUsuario(usuarioAlvo) {
-    if (!podeEditarUsuario(usuarioAtual, usuarioAlvo)) {
-      showToast('Você não tem permissão para editar este usuário.', 'error');
-      return;
-    }
-
-    try {
-      setSubmitting(true);
-
-      const usuarioAtualizado = await atualizarUsuarioApi(
-        usuarioAtual.id,
-        usuarioAlvo.id,
-        {
-          ativo: !usuarioAlvo.ativo
-        }
-      );
-
-      setUsuarios(prev =>
-        prev.map(usuario =>
-          usuario.id === usuarioAlvo.id
-            ? usuarioAtualizado
-            : usuario
-        )
-      );
-
-      showToast('Status do usuário atualizado.', 'success');
-    } catch (err) {
-      showToast(err.message || 'Erro ao atualizar usuário.', 'error');
-    } finally {
-      setSubmitting(false);
-    }
+  if (!podeEditarUsuario(usuarioAtual, usuarioAlvo)) {
+    showToast('Você não tem permissão para editar este usuário.', 'error');
+    return;
   }
+
+  try {
+    setSubmitting(true);
+
+    const usuarioAtualizado = await atualizarUsuarioApi(
+      usuarioAlvo.id,
+      {
+        ativo: !usuarioAlvo.ativo
+      }
+    );
+
+    setUsuarios(prev =>
+      prev.map(usuario =>
+        usuario.id === usuarioAlvo.id
+          ? usuarioAtualizado
+          : usuario
+      )
+    );
+
+    showToast('Status do usuário atualizado.', 'success');
+  } catch (err) {
+    showToast(err.message || 'Erro ao atualizar usuário.', 'error');
+  } finally {
+    setSubmitting(false);
+  }
+}
 
   async function excluirUsuario(usuarioAlvo) {
     if (!podeExcluirUsuario(usuarioAtual, usuarioAlvo)) {
@@ -240,7 +238,7 @@ function UsuariosPage({ showToast, usuarioAtual }) {
     try {
       setSubmitting(true);
 
-      await excluirUsuarioApi(usuarioAtual.id, usuarioAlvo.id);
+      await excluirUsuarioApi(usuarioAlvo.id);
 
       setUsuarios(prev =>
         prev.filter(usuario => usuario.id !== usuarioAlvo.id)

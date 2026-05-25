@@ -1,5 +1,17 @@
 const API_URL = 'http://localhost:3000';
 
+function getAuthHeaders() {
+  const token = localStorage.getItem('lockerRioToken');
+
+  if (!token) {
+    return {};
+  }
+
+  return {
+    Authorization: `Bearer ${token}`
+  };
+}
+
 /* =========================
    LOCKERS
 ========================= */
@@ -187,10 +199,10 @@ export async function salvarConfiguracoes(configuracoes) {
 /* =========================
    USUÁRIOS
 ========================= */
-export async function getUsuarios(usuarioAtualId) {
+export async function getUsuarios() {
   const response = await fetch(`${API_URL}/usuarios`, {
     headers: {
-      'x-usuario-id': usuarioAtualId
+      ...getAuthHeaders()
     }
   });
 
@@ -203,12 +215,12 @@ export async function getUsuarios(usuarioAtualId) {
   return data.data;
 }
 
-export async function criarUsuario(usuarioAtualId, payload) {
+export async function criarUsuario(payload) {
   const response = await fetch(`${API_URL}/usuarios`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-usuario-id': usuarioAtualId
+      ...getAuthHeaders()
     },
     body: JSON.stringify(payload)
   });
@@ -222,12 +234,12 @@ export async function criarUsuario(usuarioAtualId, payload) {
   return data.data;
 }
 
-export async function atualizarUsuario(usuarioAtualId, usuarioId, payload) {
+export async function atualizarUsuario(usuarioId, payload) {
   const response = await fetch(`${API_URL}/usuarios/${usuarioId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'x-usuario-id': usuarioAtualId
+      ...getAuthHeaders()
     },
     body: JSON.stringify(payload)
   });
@@ -241,11 +253,11 @@ export async function atualizarUsuario(usuarioAtualId, usuarioId, payload) {
   return data.data;
 }
 
-export async function excluirUsuario(usuarioAtualId, usuarioId) {
+export async function excluirUsuario(usuarioId) {
   const response = await fetch(`${API_URL}/usuarios/${usuarioId}`, {
     method: 'DELETE',
     headers: {
-      'x-usuario-id': usuarioAtualId
+      ...getAuthHeaders()
     }
   });
 
@@ -279,5 +291,8 @@ export async function loginUsuario(email, senha) {
     throw new Error(data.error || 'Erro ao realizar login');
   }
 
-  return data.data.usuario;
+  return {
+    usuario: data.data.usuario,
+    token: data.data.token
+  };
 }

@@ -150,6 +150,8 @@ function App() {
 
   function handleLogout() {
     localStorage.removeItem('lockerRioUsuario');
+    localStorage.removeItem('lockerRioToken');
+    
     setUsuarioLogado(null);
     setPaginaAtual(paginas.PAINEL);
     setMenuOpen(false);

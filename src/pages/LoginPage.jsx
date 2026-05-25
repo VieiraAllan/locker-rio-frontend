@@ -25,16 +25,21 @@ function LoginPage({ showToast, onLogin }) {
     try {
       setLoading(true);
 
-      const usuario = await loginUsuario(emailLimpo, senha);
+      const { usuario, token } = await loginUsuario(emailLimpo, senha);
 
-      localStorage.setItem(
-        'lockerRioUsuario',
-        JSON.stringify(usuario)
-      );
+localStorage.setItem(
+  'lockerRioUsuario',
+  JSON.stringify(usuario)
+);
 
-      showToast('Login realizado com sucesso.', 'success');
+localStorage.setItem(
+  'lockerRioToken',
+  token
+);
 
-      onLogin(usuario);
+showToast('Login realizado com sucesso.', 'success');
+
+onLogin(usuario);
     } catch (err) {
       showToast(
         err.message || 'Erro ao realizar login.',
