@@ -50,10 +50,7 @@ locker-rio-frontend/
 │   │   └── Toast.jsx
 │   │
 │   ├── config/
-│   │   ├── configuracoesMock.js
 │   │   ├── permissoes.js
-│   │   ├── usuarioAtual.js
-│   │   └── usuariosMock.js
 │   │
 │   ├── hooks/
 │   │   └── useToast.js
