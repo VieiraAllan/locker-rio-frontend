@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import LockerCard from '../components/LockerCard';
 import Modal from '../components/Modal';
-import { usuarioAtual } from '../config/usuarioAtual';
 
 import {
   getLockers,
@@ -13,7 +12,7 @@ import {
   getConfiguracoes
 } from '../services/api';
 
-function LockersPage({ showToast }) {
+function LockersPage({ showToast, usuarioAtual }) {
   const [lockers, setLockers] = useState([]);
   const [avulsas, setAvulsas] = useState([]);
   const [configuracoes, setConfiguracoes] = useState(null);
@@ -182,6 +181,10 @@ const totalAvulsas = avulsas.length;
   }
 
   async function confirmarNovaLocacao() {
+    if (!usuarioAtual || !usuarioAtual.id) {
+  showToast('Usuário logado não identificado. Faça login novamente.', 'error');
+  return;
+}
     if (exigirTelefoneCliente && !clienteTelefone.trim()) {
     showToast('Informe o telefone do cliente.', 'error');
     telefoneRef.current?.focus();
