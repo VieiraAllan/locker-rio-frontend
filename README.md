@@ -80,8 +80,10 @@ locker-rio-frontend/
 ├── package-lock.json
 ├── vite.config.js
 └── README.md
+```
+---
 
-🔐 Perfis de acesso
+## 🔐 Perfis de acesso
 O sistema possui três perfis principais.
 Atendente
 Pode acessar:
@@ -145,9 +147,13 @@ gerenciar gerentes;
 gerenciar administradores;
 alterar configurações do sistema.
 
-👨‍💻 Autor
-Projeto desenvolvido por Állan R.
+## 👨‍💻 Autor
 
-📄 Licença
+Projeto desenvolvido por Állan R. Vieira
+
+---
+
+## 📄 Licença
+
 Projeto privado em desenvolvimento.
 Todos os direitos reservados.
