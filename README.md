@@ -148,8 +148,10 @@ gerenciar administradores;
 alterar configurações do sistema.
 
 👨‍💻 Autor
+
 Projeto desenvolvido por Állan R.
 
 📄 Licença
+
 Projeto privado em desenvolvimento.
 Todos os direitos reservados.
