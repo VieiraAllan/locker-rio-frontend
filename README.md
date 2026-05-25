@@ -147,9 +147,11 @@ gerenciar gerentes;
 gerenciar administradores;
 alterar configurações do sistema.
 
+---
+
 ## 👨‍💻 Autor
 
-Projeto desenvolvido por Állan R. Vieira
+Projeto desenvolvido por Állan R. Vieira.
 
 ---
 
