@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import LoginPage from './pages/LoginPage';
 import LockersPage from './pages/LockersPage';
 import LocacoesAtivasPage from './pages/LocacoesAtivasPage';
 import HistoricoPage from './pages/HistoricoPage';
@@ -10,7 +11,6 @@ import ConfiguracoesPage from './pages/ConfiguracoesPage';
 import Toast from './components/Toast';
 import useToast from './hooks/useToast';
 
-import { usuarioAtual } from './config/usuarioAtual';
 import {
   paginas,
   podeAcessarPagina
@@ -22,6 +22,8 @@ function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [paginaAtual, setPaginaAtual] = useState(paginas.PAINEL);
+  const [usuarioLogado, setUsuarioLogado] = useState(null);
+  const [carregandoSessao, setCarregandoSessao] = useState(true);
 
   const itensMenu = [
     {
@@ -69,18 +71,43 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const paginaPermitida = podeAcessarPagina(usuarioAtual, paginaAtual);
+    try {
+      const usuarioSalvo = localStorage.getItem('lockerRioUsuario');
 
-    if (paginaPermitida) return;
+      if (usuarioSalvo) {
+        const usuario = JSON.parse(usuarioSalvo);
+        setUsuarioLogado(usuario);
+      }
+    } catch {
+      localStorage.removeItem('lockerRioUsuario');
+      setUsuarioLogado(null);
+    } finally {
+      setCarregandoSessao(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!usuarioLogado) {
+      return;
+    }
+
+    const paginaPermitida = podeAcessarPagina(
+      usuarioLogado,
+      paginaAtual
+    );
+
+    if (paginaPermitida) {
+      return;
+    }
 
     const primeiraPaginaPermitida = itensMenu.find(item =>
-      podeAcessarPagina(usuarioAtual, item.id)
+      podeAcessarPagina(usuarioLogado, item.id)
     );
 
     if (primeiraPaginaPermitida) {
       setPaginaAtual(primeiraPaginaPermitida.id);
     }
-  }, [paginaAtual]);
+  }, [usuarioLogado, paginaAtual]);
 
   function toggleDarkMode() {
     setDarkMode(prev => {
@@ -94,7 +121,11 @@ function App() {
   }
 
   function selecionarPagina(pagina) {
-    if (!podeAcessarPagina(usuarioAtual, pagina)) {
+    if (!usuarioLogado) {
+      return;
+    }
+
+    if (!podeAcessarPagina(usuarioLogado, pagina)) {
       return;
     }
 
@@ -110,6 +141,53 @@ function App() {
     }
 
     return item.label;
+  }
+
+  function handleLogin(usuario) {
+    setUsuarioLogado(usuario);
+    setPaginaAtual(paginas.PAINEL);
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('lockerRioUsuario');
+    setUsuarioLogado(null);
+    setPaginaAtual(paginas.PAINEL);
+    setMenuOpen(false);
+
+    showToast('Sessão encerrada com sucesso.', 'success');
+  }
+
+  if (carregandoSessao) {
+    return (
+      <div className="app-shell">
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={clearToast}
+        />
+
+        <div className="painel-container">
+          <p>Carregando sessão...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!usuarioLogado) {
+    return (
+      <>
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={clearToast}
+        />
+
+        <LoginPage
+          showToast={showToast}
+          onLogin={handleLogin}
+        />
+      </>
+    );
   }
 
   return (
@@ -137,7 +215,7 @@ function App() {
 
         <nav className="sidebar-nav">
           {itensMenu.map(item => {
-            const permitido = podeAcessarPagina(usuarioAtual, item.id);
+            const permitido = podeAcessarPagina(usuarioLogado, item.id);
             const ativo = paginaAtual === item.id;
 
             return (
@@ -173,38 +251,70 @@ function App() {
             {obterTituloPagina()}
           </div>
 
-          <button
-            type="button"
-            className="darkmode-toggle"
-            onClick={toggleDarkMode}
-          >
-            {darkMode ? '☀️ Claro' : '🌙 Escuro'}
-          </button>
+          <div className="topbar-actions">
+            <span className="topbar-user">
+              {usuarioLogado.nome}
+            </span>
+
+            <button
+              type="button"
+              className="darkmode-toggle"
+              onClick={toggleDarkMode}
+            >
+              {darkMode ? '☀️ Claro' : '🌙 Escuro'}
+            </button>
+
+            <button
+              type="button"
+              className="darkmode-toggle"
+              onClick={handleLogout}
+            >
+              Sair
+            </button>
+          </div>
         </header>
 
         <main className="app-content">
           {paginaAtual === paginas.PAINEL && (
-            <LockersPage showToast={showToast} />
+            <LockersPage
+              showToast={showToast}
+              usuarioAtual={usuarioLogado}
+            />
           )}
 
           {paginaAtual === paginas.LOCACOES && (
-            <LocacoesAtivasPage showToast={showToast} />
+            <LocacoesAtivasPage
+              showToast={showToast}
+              usuarioAtual={usuarioLogado}
+            />
           )}
 
           {paginaAtual === paginas.HISTORICO && (
-            <HistoricoPage showToast={showToast} />
+            <HistoricoPage
+              showToast={showToast}
+              usuarioAtual={usuarioLogado}
+            />
           )}
 
           {paginaAtual === paginas.RELATORIOS && (
-            <RelatoriosPage showToast={showToast} />
+            <RelatoriosPage
+              showToast={showToast}
+              usuarioAtual={usuarioLogado}
+            />
           )}
 
           {paginaAtual === paginas.USUARIOS && (
-            <UsuariosPage showToast={showToast} />
+            <UsuariosPage
+              showToast={showToast}
+              usuarioAtual={usuarioLogado}
+            />
           )}
 
           {paginaAtual === paginas.CONFIGURACOES && (
-            <ConfiguracoesPage showToast={showToast} />
+            <ConfiguracoesPage
+              showToast={showToast}
+              usuarioAtual={usuarioLogado}
+            />
           )}
         </main>
       </div>

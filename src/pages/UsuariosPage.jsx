@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { usuarioAtual } from '../config/usuarioAtual';
-
 import {
   perfis,
   paginas,
@@ -23,7 +21,7 @@ import {
   excluirUsuario as excluirUsuarioApi
 } from '../services/api';
 
-function UsuariosPage({ showToast }) {
+function UsuariosPage({ showToast, usuarioAtual }) {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -79,12 +77,12 @@ function UsuariosPage({ showToast }) {
   }
 
   useEffect(() => {
-    if (podeAcessar) {
-      carregarUsuarios();
-    } else {
-      setLoading(false);
-    }
-  }, [podeAcessar]);
+  if (podeAcessar && usuarioAtual?.id) {
+    carregarUsuarios();
+  } else {
+    setLoading(false);
+  }
+}, [podeAcessar, usuarioAtual?.id]);
 
   function limparFormulario() {
     setUsuarioEditando(null);
