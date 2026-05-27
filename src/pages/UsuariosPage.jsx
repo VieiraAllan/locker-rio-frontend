@@ -18,7 +18,8 @@ import {
   getUsuarios,
   criarUsuario as criarUsuarioApi,
   atualizarUsuario as atualizarUsuarioApi,
-  excluirUsuario as excluirUsuarioApi
+  excluirUsuario as excluirUsuarioApi,
+  alterarSenhaUsuario
 } from '../services/api';
 
 function UsuariosPage({ showToast, usuarioAtual }) {
@@ -33,6 +34,12 @@ function UsuariosPage({ showToast, usuarioAtual }) {
   const [formEmail, setFormEmail] = useState('');
   const [formPerfil, setFormPerfil] = useState(perfis.ATENDENTE);
   const [formAtivo, setFormAtivo] = useState(true);
+
+  const [senhaModalAberto, setSenhaModalAberto] = useState(false);
+  const [usuarioSenha, setUsuarioSenha] = useState(null);
+  const [novaSenha, setNovaSenha] = useState('');
+  const [confirmarNovaSenha, setConfirmarNovaSenha] = useState('');
+  const [salvandoSenha, setSalvandoSenha] = useState(false);
 
   const podeAcessar = podeAcessarPagina(usuarioAtual, paginas.USUARIOS);
   const podeGerenciar = podeGerenciarUsuarios(usuarioAtual);
@@ -252,6 +259,68 @@ function UsuariosPage({ showToast, usuarioAtual }) {
     }
   }
 
+function abrirModalSenha(usuario) {
+  if (!podeEditarUsuario(usuarioAtual, usuario)) {
+    showToast('Você não tem permissão para definir senha deste usuário.', 'error');
+    return;
+  }
+
+  setUsuarioSenha(usuario);
+  setNovaSenha('');
+  setConfirmarNovaSenha('');
+  setSenhaModalAberto(true);
+}
+
+function fecharModalSenha() {
+  if (salvandoSenha) {
+    return;
+  }
+
+  setSenhaModalAberto(false);
+  setUsuarioSenha(null);
+  setNovaSenha('');
+  setConfirmarNovaSenha('');
+}
+
+async function salvarSenhaUsuario() {
+  if (!usuarioSenha || !usuarioSenha.id) {
+    showToast('Usuário não identificado.', 'error');
+    return;
+  }
+
+  if (!novaSenha.trim()) {
+    showToast('Informe a nova senha.', 'error');
+    return;
+  }
+
+  if (novaSenha.length < 6) {
+    showToast('A senha deve ter pelo menos 6 caracteres.', 'error');
+    return;
+  }
+
+  if (novaSenha !== confirmarNovaSenha) {
+    showToast('A confirmação da senha não confere.', 'error');
+    return;
+  }
+
+  try {
+    setSalvandoSenha(true);
+
+    await alterarSenhaUsuario(usuarioSenha.id, novaSenha);
+
+    showToast('Senha definida com sucesso.', 'success');
+
+    fecharModalSenha();
+  } catch (err) {
+    showToast(
+      err.message || 'Erro ao definir senha.',
+      'error'
+    );
+  } finally {
+    setSalvandoSenha(false);
+  }
+}
+
   if (!podeAcessar) {
     return (
       <div className="painel-container">
@@ -308,6 +377,85 @@ function UsuariosPage({ showToast, usuarioAtual }) {
           {obterDescricaoRegraDoPerfil(usuarioAtual.perfil)}
         </span>
       </div>
+
+{senhaModalAberto && usuarioSenha && (
+  <div className="usuario-senha-overlay">
+    <div className="usuario-senha-modal">
+      <div className="usuario-senha-header">
+        <div>
+          <h3>Definir senha</h3>
+          <p>
+            Defina uma nova senha para {usuarioSenha.nome}.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={fecharModalSenha}
+          disabled={salvandoSenha}
+          aria-label="Fechar"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="usuario-senha-body">
+        <label className="usuarios-form-field">
+          <span>Usuário</span>
+          <input
+            value={`${usuarioSenha.nome} — ${usuarioSenha.email}`}
+            disabled
+          />
+        </label>
+
+        <label className="usuarios-form-field">
+          <span>Nova senha</span>
+          <input
+            type="password"
+            value={novaSenha}
+            onChange={e => setNovaSenha(e.target.value)}
+            placeholder="Digite a nova senha"
+            autoComplete="new-password"
+            disabled={salvandoSenha}
+          />
+          <small>
+            A senha deve ter pelo menos 6 caracteres.
+          </small>
+        </label>
+
+        <label className="usuarios-form-field">
+          <span>Confirmar nova senha</span>
+          <input
+            type="password"
+            value={confirmarNovaSenha}
+            onChange={e => setConfirmarNovaSenha(e.target.value)}
+            placeholder="Confirme a nova senha"
+            autoComplete="new-password"
+            disabled={salvandoSenha}
+          />
+        </label>
+      </div>
+
+      <div className="usuario-senha-actions">
+        <button
+          type="button"
+          onClick={fecharModalSenha}
+          disabled={salvandoSenha}
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          onClick={salvarSenhaUsuario}
+          disabled={salvandoSenha}
+        >
+          {salvandoSenha ? 'Salvando...' : 'Salvar senha'}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {formAberto && (
         <div className="usuarios-form-card">
@@ -452,30 +600,38 @@ function UsuariosPage({ showToast, usuarioAtual }) {
                 </div>
 
                 <div className="usuario-card-actions">
-                  <button
-                    type="button"
-                    onClick={() => abrirFormularioEdicao(usuario)}
-                    disabled={!podeEditar || submitting}
-                  >
-                    Editar
-                  </button>
+  <button
+    type="button"
+    onClick={() => abrirFormularioEdicao(usuario)}
+    disabled={!podeEditar || submitting}
+  >
+    Editar
+  </button>
 
-                  <button
-                    type="button"
-                    onClick={() => alternarStatusUsuario(usuario)}
-                    disabled={!podeEditar || submitting}
-                  >
-                    {usuario.ativo ? 'Desativar' : 'Ativar'}
-                  </button>
+  <button
+    type="button"
+    onClick={() => abrirModalSenha(usuario)}
+    disabled={!podeEditar || submitting || salvandoSenha}
+  >
+    Definir senha
+  </button>
 
-                  <button
-                    type="button"
-                    onClick={() => excluirUsuario(usuario)}
-                    disabled={!podeExcluir || submitting}
-                  >
-                    Excluir
-                  </button>
-                </div>
+  <button
+    type="button"
+    onClick={() => alternarStatusUsuario(usuario)}
+    disabled={!podeEditar || submitting}
+  >
+    {usuario.ativo ? 'Desativar' : 'Ativar'}
+  </button>
+
+  <button
+    type="button"
+    onClick={() => excluirUsuario(usuario)}
+    disabled={!podeExcluir || submitting}
+  >
+    Excluir
+  </button>
+</div>
               </div>
             );
           })}

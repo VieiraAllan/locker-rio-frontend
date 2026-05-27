@@ -3128,3 +3128,320 @@ body.dark .topbar-user {
   }
 }
 /* ===== FIM — PÁGINA LOGIN ===== */
+
+/* ======================================================
+   CONFIGURAÇÕES — CARD DE SENHA
+====================================================== */
+
+.configuracao-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+
+  margin-top: 14px;
+  padding-top: 12px;
+
+  border-top: 1px solid var(--input-border);
+}
+
+.configuracao-card-actions button {
+  padding: 9px 13px;
+  border-radius: 999px;
+
+  border: 1px solid var(--input-border);
+  background: var(--card-bg);
+  color: var(--text-main);
+
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.configuracao-card-actions button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+}
+
+.configuracao-card-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.configuracao-card-actions button:last-child {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.configuracao-card-actions button:last-child:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+body.dark .configuracao-card-actions {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark .configuracao-card-actions button {
+  background: var(--card-bg);
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark .configuracao-card-actions button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(77, 214, 163, 0.08);
+}
+
+body.dark .configuracao-card-actions button:last-child {
+  background: var(--accent);
+  color: #102019;
+  border-color: var(--accent);
+}
+
+@media (max-width: 520px) {
+  .configuracao-card-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .configuracao-card-actions button {
+    width: 100%;
+  }
+}
+/* ===== FIM — CONFIGURAÇÕES — CARD DE SENHA ===== */
+
+/* ======================================================
+   PÁGINA — USUÁRIOS — MODAL DEFINIR SENHA
+====================================================== */
+
+.usuario-senha-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.usuario-senha-modal {
+  width: 100%;
+  max-width: 440px;
+
+  background: var(--card-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 16px;
+
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+
+  overflow: hidden;
+}
+
+.usuario-senha-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+
+  padding: 16px;
+  border-bottom: 1px solid var(--input-border);
+}
+
+.usuario-senha-header h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 850;
+}
+
+.usuario-senha-header p {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.72;
+  line-height: 1.35;
+}
+
+.usuario-senha-header button {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+
+  border: 1px solid var(--input-border);
+  background: var(--card-bg);
+  color: var(--text-main);
+
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.usuario-senha-header button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+}
+
+.usuario-senha-header button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.usuario-senha-body {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.usuario-senha-body small {
+  display: block;
+  margin-top: 5px;
+
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.usuario-senha-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+
+  padding: 14px 16px;
+  border-top: 1px solid var(--input-border);
+}
+
+.usuario-senha-actions button {
+  padding: 9px 13px;
+  border-radius: 999px;
+
+  border: 1px solid var(--input-border);
+  background: var(--card-bg);
+  color: var(--text-main);
+
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.usuario-senha-actions button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+}
+
+.usuario-senha-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.usuario-senha-actions button:last-child {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.usuario-senha-actions button:last-child:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+/* ======================================================
+   PÁGINA — USUÁRIOS — MODAL DEFINIR SENHA — DARK MODE
+====================================================== */
+
+body.dark .usuario-senha-overlay {
+  background: rgba(0, 0, 0, 0.62);
+}
+
+body.dark .usuario-senha-modal {
+  background: var(--card-bg);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+}
+
+body.dark .usuario-senha-header,
+body.dark .usuario-senha-actions {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark .usuario-senha-header button,
+body.dark .usuario-senha-actions button {
+  background: var(--card-bg);
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark .usuario-senha-header button:hover:not(:disabled),
+body.dark .usuario-senha-actions button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(77, 214, 163, 0.08);
+}
+
+body.dark .usuario-senha-actions button:last-child {
+  background: var(--accent);
+  color: #102019;
+  border-color: var(--accent);
+}
+
+/* ======================================================
+   PÁGINA — USUÁRIOS — MODAL DEFINIR SENHA — RESPONSIVIDADE
+====================================================== */
+
+@media (max-width: 520px) {
+  .usuario-senha-overlay {
+    align-items: flex-end;
+    padding: 12px;
+  }
+
+  .usuario-senha-modal {
+    border-radius: 16px;
+  }
+
+  .usuario-senha-header {
+    padding: 14px;
+  }
+
+  .usuario-senha-body {
+    padding: 14px;
+  }
+
+  .usuario-senha-actions {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px;
+  }
+
+  .usuario-senha-actions button {
+    width: 100%;
+  }
+}
+/* ===== FIM — PÁGINA USUÁRIOS — MODAL DEFINIR SENHA ===== */

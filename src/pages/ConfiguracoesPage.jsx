@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 
 import {
   getConfiguracoes,
-  salvarConfiguracoes as salvarConfiguracoesApi
+  salvarConfiguracoes as salvarConfiguracoesApi,
+  alterarSenhaUsuario
 } from '../services/api';
 
 function formatarValorConfiguracao(valor) {
@@ -14,9 +15,13 @@ function formatarValorConfiguracao(valor) {
   });
 }
 
-function ConfiguracoesPage({ showToast }) {
+function ConfiguracoesPage({ showToast, usuarioAtual }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const [senhaNova, setSenhaNova] = useState('');
+  const [senhaConfirmacao, setSenhaConfirmacao] = useState('');
+  const [salvandoSenha, setSalvandoSenha] = useState(false);
 
   const [estabelecimento, setEstabelecimento] = useState({
     nome: '',
@@ -143,6 +148,46 @@ function ConfiguracoesPage({ showToast }) {
 
     showToast('Configurações recarregadas do banco.', 'success');
   }
+
+  async function salvarSenhaUsuario() {
+  if (!usuarioAtual || !usuarioAtual.id) {
+    showToast('Usuário logado não identificado. Faça login novamente.', 'error');
+    return;
+  }
+
+  if (!senhaNova.trim()) {
+    showToast('Informe a nova senha.', 'error');
+    return;
+  }
+
+  if (senhaNova.length < 6) {
+    showToast('A senha deve ter pelo menos 6 caracteres.', 'error');
+    return;
+  }
+
+  if (senhaNova !== senhaConfirmacao) {
+    showToast('A confirmação da senha não confere.', 'error');
+    return;
+  }
+
+  try {
+    setSalvandoSenha(true);
+
+    await alterarSenhaUsuario(usuarioAtual.id, senhaNova);
+
+    setSenhaNova('');
+    setSenhaConfirmacao('');
+
+    showToast('Senha alterada com sucesso.', 'success');
+  } catch (err) {
+    showToast(
+      err.message || 'Erro ao alterar senha.',
+      'error'
+    );
+  } finally {
+    setSalvandoSenha(false);
+  }
+}
 
   if (loading) {
     return (
@@ -387,6 +432,74 @@ function ConfiguracoesPage({ showToast }) {
             />
           </label>
         </section>
+
+            <section className="configuracao-card">
+  <div className="configuracao-card-header">
+    <h3>Minha senha</h3>
+    <span>Alteração de senha do usuário logado</span>
+  </div>
+
+  <label className="configuracao-field">
+    <span>Usuário</span>
+    <input
+      value={
+        usuarioAtual
+          ? `${usuarioAtual.nome} — ${usuarioAtual.email}`
+          : 'Usuário não identificado'
+      }
+      disabled
+    />
+  </label>
+
+  <label className="configuracao-field">
+    <span>Nova senha</span>
+    <input
+      type="password"
+      value={senhaNova}
+      onChange={e => setSenhaNova(e.target.value)}
+      placeholder="Digite a nova senha"
+      autoComplete="new-password"
+      disabled={salvandoSenha}
+    />
+    <small>
+      A senha deve ter pelo menos 6 caracteres.
+    </small>
+  </label>
+
+  <label className="configuracao-field">
+    <span>Confirmar nova senha</span>
+    <input
+      type="password"
+      value={senhaConfirmacao}
+      onChange={e => setSenhaConfirmacao(e.target.value)}
+      placeholder="Confirme a nova senha"
+      autoComplete="new-password"
+      disabled={salvandoSenha}
+    />
+  </label>
+
+  <div className="configuracao-card-actions">
+    <button
+      type="button"
+      onClick={() => {
+        setSenhaNova('');
+        setSenhaConfirmacao('');
+      }}
+      disabled={salvandoSenha}
+    >
+      Limpar
+    </button>
+
+    <button
+      type="button"
+      onClick={salvarSenhaUsuario}
+      disabled={salvandoSenha}
+    >
+      {salvandoSenha ? 'Alterando...' : 'Alterar senha'}
+    </button>
+  </div>
+</section>
+
       </div>
     </div>
   );

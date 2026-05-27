@@ -168,7 +168,12 @@ export async function getResumoRelatorio({
    CONFIGURAÇÕES DO SISTEMA
 ========================= */
 export async function getConfiguracoes() {
-  const response = await fetch(`${API_URL}/configuracoes`);
+  const response = await fetch(`${API_URL}/configuracoes`, {
+    headers: {
+      ...getAuthHeaders()
+    }
+  });
+
   const data = await response.json();
 
   if (!response.ok) {
@@ -182,7 +187,8 @@ export async function salvarConfiguracoes(configuracoes) {
   const response = await fetch(`${API_URL}/configuracoes`, {
     method: 'PUT',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...getAuthHeaders()
     },
     body: JSON.stringify(configuracoes)
   });
@@ -295,4 +301,28 @@ export async function loginUsuario(email, senha) {
     usuario: data.data.usuario,
     token: data.data.token
   };
+}
+
+/* =========================
+   SENHA DO USUÁRIO
+========================= */
+export async function alterarSenhaUsuario(usuarioId, senha) {
+  const response = await fetch(`${API_URL}/usuarios/${usuarioId}/senha`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders()
+    },
+    body: JSON.stringify({
+      senha
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Erro ao alterar senha');
+  }
+
+  return data.data;
 }
