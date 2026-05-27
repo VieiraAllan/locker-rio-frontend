@@ -73,11 +73,11 @@ export const permissoesPorPerfil = {
       'locacoes',
       'historico',
       'relatorios',
-      'usuarios'
+      'usuarios',
+      'configuracoes'
     ],
 
     podeGerenciarUsuarios: true,
-
     perfisQuePodeVisualizar: [
       'atendente'
     ],
