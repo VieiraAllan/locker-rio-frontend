@@ -1,6 +1,58 @@
 import { useEffect, useState } from 'react';
 import { getResumoRelatorio } from '../services/api';
 
+function escapeCsvField(value, separador = ';') {
+  const texto = String(value ?? '');
+
+  if (
+    texto.includes(separador) ||
+    texto.includes('"') ||
+    texto.includes('\n') ||
+    texto.includes('\r')
+  ) {
+    return `"${texto.replace(/"/g, '""')}"`;
+  }
+
+  return texto;
+}
+
+function formatarListaLockers(lockers) {
+  if (!Array.isArray(lockers) || lockers.length === 0) {
+    return '';
+  }
+
+  return lockers.join(' | ');
+}
+
+function formatarListaBagagens(bagagens) {
+  if (!Array.isArray(bagagens) || bagagens.length === 0) {
+    return '';
+  }
+
+  return bagagens
+    .map(bagagem => `${bagagem.quantidade}x ${bagagem.descricao}`)
+    .join(' | ');
+}
+
+function gerarNomeArquivoCsv(periodo) {
+  const hoje = new Date().toISOString().slice(0, 10);
+
+  if (periodo === 'hoje') {
+    return `relatorio-locker-rio-hoje-${hoje}.csv`;
+  }
+
+  if (periodo === '7dias') {
+    return `relatorio-locker-rio-ultimos-7-dias-${hoje}.csv`;
+  }
+
+  if (periodo === 'mes') {
+    return `relatorio-locker-rio-este-mes-${hoje}.csv`;
+  }
+
+  return `relatorio-locker-rio-${hoje}.csv`;
+}
+
+
 function RelatoriosPage({ showToast }) {
   const [periodo, setPeriodo] = useState('hoje');
   const [resumo, setResumo] = useState(null);
@@ -61,6 +113,90 @@ function RelatoriosPage({ showToast }) {
     return 'Período';
   }
 
+function exportarCsv() {
+  const lista = Array.isArray(resumo?.locacoes)
+    ? resumo.locacoes
+    : [];
+
+  if (lista.length === 0) {
+    showToast('Não há dados para exportar.', 'error');
+    return;
+  }
+
+  const separador = ';';
+
+  const cabecalhos = [
+    'Recibo',
+    'Data',
+    'Entrada',
+    'Pago até',
+    'Cliente',
+    'Telefone',
+    'Documento/Observação',
+    'Tipo',
+    'Lockers',
+    'Bagagens Extras',
+    'Volumes Extras',
+    'Lacres',
+    'Valor Pago',
+    'Status',
+    'Usuário Abertura',
+    'Perfil Abertura'
+  ];
+
+  const linhas = lista.map(locacao => {
+    const totalVolumes = Number(locacao.total_volumes || 0);
+    const valorPago = Number(locacao.valor_pago || 0)
+      .toFixed(2)
+      .replace('.', ',');
+
+    return [
+      locacao.recibo_numero || '',
+      locacao.data || '',
+      locacao.hora_entrada || '',
+      locacao.hora_pago_ate || '',
+      locacao.cliente_nome || '',
+      locacao.cliente_telefone || '',
+      locacao.cliente_documento || '',
+      locacao.tipo || '',
+      formatarListaLockers(locacao.lockers),
+      formatarListaBagagens(locacao.bagagens),
+      totalVolumes,
+      locacao.lacres || '',
+      valorPago,
+      locacao.status || '',
+      locacao.usuario_abertura_nome || '',
+      locacao.usuario_abertura_perfil || ''
+    ];
+  });
+
+  const conteudoCsv = [
+    cabecalhos.map(campo => escapeCsvField(campo, separador)).join(separador),
+    ...linhas.map(linha =>
+      linha.map(campo => escapeCsvField(campo, separador)).join(separador)
+    )
+  ].join('\r\n');
+
+  const csvComBom = '\uFEFF' + conteudoCsv;
+
+  const blob = new Blob([csvComBom], {
+    type: 'text/csv;charset=utf-8;'
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download = gerarNomeArquivoCsv(periodo);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(url);
+
+  showToast('Relatório exportado em CSV com sucesso.', 'success');
+}
+
   if (loading && !resumo) {
     return (
       <div className="painel-container">
@@ -111,6 +247,14 @@ function RelatoriosPage({ showToast }) {
           disabled={loading}
         >
           Este mês
+        </button>
+
+        <button
+          type="button"
+          onClick={exportarCsv}
+          disabled={!resumo?.locacoes?.length}
+        >
+          Exportar CSV
         </button>
       </div>
 
