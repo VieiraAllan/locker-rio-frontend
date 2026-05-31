@@ -3445,3 +3445,68 @@ body.dark .usuario-senha-actions button:last-child {
   }
 }
 /* ===== FIM — PÁGINA USUÁRIOS — MODAL DEFINIR SENHA ===== */
+
+/* ======================================================
+   HISTÓRICO — BOTÃO RECIBO PDF
+====================================================== */
+.historico-topo-acoes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.historico-recibo-btn {
+  padding: 8px 12px;
+  border-radius: 999px;
+
+  border: 1px solid var(--accent);
+  background: var(--card-bg);
+  color: var(--accent);
+
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.historico-recibo-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(30, 127, 92, 0.08);
+}
+
+.historico-recibo-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+body.dark .historico-recibo-btn {
+  background: var(--card-bg);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+body.dark .historico-recibo-btn:hover:not(:disabled) {
+  background: rgba(77, 214, 163, 0.08);
+}
+
+@media (max-width: 560px) {
+  .historico-topo-acoes {
+    justify-content: flex-start;
+  }
+
+  .historico-recibo-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+/* ===== FIM — HISTÓRICO — BOTÃO RECIBO PDF ===== */

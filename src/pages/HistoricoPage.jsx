@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
-import { getHistoricoLocacoes } from '../services/api';
+import {
+  getHistoricoLocacoes,
+  abrirReciboPdf
+} from '../services/api';
 
 function HistoricoPage({ showToast }) {
   const [historico, setHistorico] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [gerandoReciboId, setGerandoReciboId] = useState(null);
 
   async function carregarHistorico() {
     try {
@@ -42,6 +46,18 @@ function HistoricoPage({ showToast }) {
     const [ano, mes, dia] = partes;
     return `${dia}/${mes}/${ano}`;
   }
+
+async function handleAbrirRecibo(locacaoId) {
+  try {
+    setGerandoReciboId(locacaoId);
+
+    await abrirReciboPdf(locacaoId);
+  } catch (err) {
+    showToast(err.message || 'Erro ao abrir recibo.', 'error');
+  } finally {
+    setGerandoReciboId(null);
+  }
+}
 
   if (loading) {
     return (
@@ -83,15 +99,26 @@ function HistoricoPage({ showToast }) {
                   </span>
                 </div>
 
-                <span
-                  className={
-                    locacao.tipo === 'avulsa'
-                      ? 'historico-badge avulsa'
-                      : 'historico-badge locker'
-                  }
-                >
-                  {locacao.tipo === 'avulsa' ? 'Avulsa' : 'Locker'}
-                </span>
+                <div className="historico-topo-acoes">
+                  <button
+                    type="button"
+                    className="historico-recibo-btn"
+                    onClick={() => handleAbrirRecibo(locacao.id)}
+                    disabled={gerandoReciboId === locacao.id}
+                  >
+                    {gerandoReciboId === locacao.id ? 'Abrindo PDF...' : 'Recibo PDF'}
+                  </button>
+
+                  <span
+                    className={
+                      locacao.tipo === 'avulsa'
+                        ? 'historico-badge avulsa'
+                        : 'historico-badge locker'
+                    }
+                  >
+                    {locacao.tipo === 'avulsa' ? 'Avulsa' : 'Locker'}
+                  </span>
+                </div>
               </div>
 
               <div className="historico-detalhes">

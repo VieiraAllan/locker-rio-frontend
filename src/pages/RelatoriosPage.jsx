@@ -52,7 +52,6 @@ function gerarNomeArquivoCsv(periodo) {
   return `relatorio-locker-rio-${hoje}.csv`;
 }
 
-
 function RelatoriosPage({ showToast }) {
   const [periodo, setPeriodo] = useState('hoje');
   const [resumo, setResumo] = useState(null);

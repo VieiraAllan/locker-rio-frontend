@@ -326,3 +326,36 @@ export async function alterarSenhaUsuario(usuarioId, senha) {
 
   return data.data;
 }
+
+/* =========================
+   RECIBO PDF
+========================= */
+export async function abrirReciboPdf(locacaoId) {
+  const response = await fetch(`${API_URL}/recibos/${locacaoId}/pdf`, {
+    headers: {
+      ...getAuthHeaders()
+    }
+  });
+
+  if (!response.ok) {
+    let mensagemErro = 'Erro ao gerar recibo';
+
+    try {
+      const data = await response.json();
+      mensagemErro = data.error || mensagemErro;
+    } catch {
+      // ignora erro de parse quando a resposta não for JSON
+    }
+
+    throw new Error(mensagemErro);
+  }
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+
+  window.open(url, '_blank', 'noopener,noreferrer');
+
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 60000);
+}
