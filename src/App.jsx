@@ -33,7 +33,7 @@ function App() {
     },
     {
       id: paginas.LOCACOES,
-      label: 'Locações',
+      label: 'Locações Ativas',
       icon: '▤'
     },
     {

@@ -52,17 +52,51 @@ function LockersPage({ showToast, usuarioAtual }) {
     0
   );
 
+  const quantidadeLockersSelecionados =
+    isAvulsa || !selectedLocker ? 0 : 1;
+
+  const valorLockerConfigurado = Number(
+    configuracoes?.operacao?.valorLocker ?? 30
+  );
+
+  const valorBagagemAvulsaConfigurado = Number(
+    configuracoes?.operacao?.valorBagagemAvulsa ?? 30
+  );
+
+  const valorTotalLocacao = (() => {
+    if (inRioTour && permitirInRioTour) {
+      return 0;
+    }
+
+    let total = 0;
+
+    if (!isAvulsa) {
+      total += valorLockerConfigurado * quantidadeLockersSelecionados;
+    }
+
+    total += valorBagagemAvulsaConfigurado * totalVolumes;
+
+    return total;
+  })();
+
+  function formatarMoeda(valor) {
+    return Number(valor || 0).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
+  }
+
   const permitirBagagemAvulsa =
   configuracoes?.operacao?.permitirBagagemAvulsa !== false;
 
-const permitirInRioTour =
-  configuracoes?.operacao?.permitirInRioTour !== false;
+  const permitirInRioTour =
+    configuracoes?.operacao?.permitirInRioTour !== false;
 
-const exigirLacres =
-  configuracoes?.operacao?.exigirLacres !== false;
+  const exigirLacres =
+    configuracoes?.operacao?.exigirLacres !== false;
 
-const exigirTelefoneCliente =
-  configuracoes?.operacao?.exigirTelefoneCliente !== false;
+  const exigirTelefoneCliente =
+    configuracoes?.operacao?.exigirTelefoneCliente !== false;
 
   const totalDisponiveis = lockers.filter(
   locker => locker.status === 'disponivel'
@@ -204,6 +238,12 @@ const totalAvulsas = avulsas.length;
       return;
     }
 
+    if (valorNormalizado > valorTotalLocacao) {
+      showToast('O valor pago agora não pode ser maior que o valor total da locação.', 'error');
+      valorPagoRef.current?.focus();
+      return;
+    }
+
     if (exigirLacres && !lacres.trim()) {
     showToast('Informe a numeração dos lacres.', 'error');
     lacresRef.current?.focus();
@@ -231,6 +271,7 @@ const totalAvulsas = avulsas.length;
         cliente_telefone: clienteTelefone,
         cliente_documento: clienteDocumento,
         lacres,
+        valor_pago_inicial: valorNormalizado,
         usuario_abertura_id: usuarioAtual.id,
         usuario_abertura_nome: usuarioAtual.nome,
         usuario_abertura_perfil: usuarioAtual.perfil
@@ -386,7 +427,18 @@ async function confirmarFinalizacao() {
         />
         <input placeholder="Documento / Observação" value={clienteDocumento} onChange={e => setClienteDocumento(e.target.value)} />
 
-        <input ref={valorPagoRef} placeholder="Valor pago na locação" value={valorPago} onChange={e => setValorPago(e.target.value)} />
+        <div className="valor-locacao-resumo">
+          <span>Valor total da locação</span>
+          <strong>{formatarMoeda(valorTotalLocacao)}</strong>
+        </div>
+
+        <input
+          ref={valorPagoRef}
+          placeholder="Valor pago agora"
+          value={valorPago}
+          onChange={e => setValorPago(e.target.value)}
+        />
+        
         <input
           ref={lacresRef}
           placeholder={

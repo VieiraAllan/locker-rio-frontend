@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
-import { getLocacoesAtivas } from '../services/api';
+import {
+  getLocacoesAtivas,
+  abrirReciboPdf
+} from '../services/api';
 
 function LocacoesAtivasPage({ showToast }) {
   const [locacoes, setLocacoes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [gerandoReciboId, setGerandoReciboId] = useState(null);
 
   async function carregarLocacoesAtivas() {
     try {
@@ -20,6 +24,25 @@ function LocacoesAtivasPage({ showToast }) {
   useEffect(() => {
     carregarLocacoesAtivas();
   }, []);
+
+  async function handleAbrirRecibo(locacaoId) {
+    try {
+      setGerandoReciboId(locacaoId);
+
+      await abrirReciboPdf(locacaoId);
+    } catch (err) {
+      showToast(err.message || 'Erro ao abrir recibo.', 'error');
+    } finally {
+      setGerandoReciboId(null);
+    }
+  }
+
+  function formatarValor(valor) {
+    return Number(valor || 0).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
+  }
 
   if (loading) {
     return (
@@ -48,85 +71,105 @@ function LocacoesAtivasPage({ showToast }) {
         </div>
       ) : (
         <div className="locacoes-lista">
-          {locacoes.map(locacao => (
-            <div key={locacao.id} className="locacao-card">
-              <div className="locacao-card-topo">
-                <div>
-                  <strong>{locacao.cliente_nome}</strong>
-                  <span>
-                    {locacao.tipo === 'avulsa'
-                      ? '📦 Bagagem avulsa'
-                      : `Armário ${locacao.lockers.join(', ')}`}
-                  </span>
+          {locacoes.map(locacao => {
+            const valorPagoInicial = Number(
+              locacao.valor_pago_inicial ?? locacao.valor_pago ?? 0
+            );
+
+            return (
+              <div key={locacao.id} className="locacao-card">
+                <div className="locacao-card-topo">
+                  <div>
+                    <strong>{locacao.cliente_nome}</strong>
+
+                    <span>
+                      {locacao.tipo === 'avulsa'
+                        ? '📦 Bagagem avulsa'
+                        : `Armário ${locacao.lockers.join(', ')}`}
+                    </span>
+                  </div>
+
+                  <div className="locacao-topo-acoes">
+                    <button
+                      type="button"
+                      className="locacao-recibo-btn"
+                      onClick={() => handleAbrirRecibo(locacao.id)}
+                      disabled={gerandoReciboId === locacao.id}
+                    >
+                      {gerandoReciboId === locacao.id
+                        ? 'Abrindo PDF...'
+                        : 'Recibo PDF'}
+                    </button>
+
+                    <span
+                      className={
+                        locacao.tipo === 'avulsa'
+                          ? 'locacao-badge avulsa'
+                          : 'locacao-badge locker'
+                      }
+                    >
+                      {locacao.tipo === 'avulsa' ? 'Avulsa' : 'Locker'}
+                    </span>
+                  </div>
                 </div>
 
-                <span
-                  className={
-                    locacao.tipo === 'avulsa'
-                      ? 'locacao-badge avulsa'
-                      : 'locacao-badge locker'
-                  }
-                >
-                  {locacao.tipo === 'avulsa' ? 'Avulsa' : 'Locker'}
-                </span>
-              </div>
+                <div className="locacao-detalhes">
+                  <div>
+                    <span>Telefone</span>
+                    <strong>{locacao.cliente_telefone || '-'}</strong>
+                  </div>
 
-              <div className="locacao-detalhes">
-                <div>
-                  <span>Telefone</span>
-                  <strong>{locacao.cliente_telefone}</strong>
-                </div>
+                  <div>
+                    <span>Entrada</span>
+                    <strong>{locacao.hora_entrada || '-'}</strong>
+                  </div>
 
-                <div>
-                  <span>Entrada</span>
-                  <strong>{locacao.hora_entrada}</strong>
-                </div>
+                  <div>
+                    <span>Pago até</span>
+                    <strong>{locacao.hora_pago_ate || '-'}</strong>
+                  </div>
 
-                <div>
-                  <span>Pago até</span>
-                  <strong>{locacao.hora_pago_ate}</strong>
-                </div>
+                  <div>
+                    <span>Lacres</span>
+                    <strong>{locacao.lacres || '-'}</strong>
+                  </div>
 
-                <div>
-                  <span>Lacres</span>
-                  <strong>{locacao.lacres || '-'}</strong>
-                </div>
+                  <div>
+                    <span>Volumes extras</span>
+                    <strong>{locacao.total_volumes || 0}</strong>
+                  </div>
 
-                <div>
-                  <span>Volumes extras</span>
-                  <strong>{locacao.total_volumes}</strong>
-                </div>
+                  <div>
+                    <span>Valor pago</span>
+                    <strong>{formatarValor(valorPagoInicial)}</strong>
+                  </div>
 
-                <div>
-                  <span>Valor pago</span>
-                  <strong>R$ {Number(locacao.valor_pago || 0).toFixed(2)}</strong>
-                </div>
-
-                <div>
+                  <div>
                     <span>Aberta por</span>
                     <strong>
-                    {locacao.usuario_abertura_nome
-                    ? `${locacao.usuario_abertura_nome} — ${locacao.usuario_abertura_perfil}`
-                  : '-'}
+                      {locacao.usuario_abertura_nome
+                        ? `${locacao.usuario_abertura_nome} — ${locacao.usuario_abertura_perfil}`
+                        : '-'}
                     </strong>
+                  </div>
                 </div>
+
+                {locacao.bagagens.length > 0 && (
+                  <div className="locacao-bagagens">
+                    <span>Bagagens Extras</span>
+
+                    <ul>
+                      {locacao.bagagens.map((bagagem, index) => (
+                        <li key={index}>
+                          {bagagem.descricao} — {bagagem.quantidade}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
-
-              {locacao.bagagens.length > 0 && (
-                <div className="locacao-bagagens">
-                  <span>Bagagens Extras</span>
-
-                  <ul>
-                    {locacao.bagagens.map((bagagem, index) => (
-                      <li key={index}>
-                        {bagagem.descricao} — {bagagem.quantidade}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
