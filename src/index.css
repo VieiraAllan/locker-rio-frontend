@@ -3931,3 +3931,57 @@ body.dark .finalizacao-metrica.destaque {
   }
 }
 /* ===== FIM — MODAL — RESPONSIVO E FINALIZAÇÃO ===== */
+
+/* ======================================================
+   WHATSAPP — CONFIGURAÇÃO NO MODAL
+====================================================== */
+.whatsapp-config-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.whatsapp-config-item {
+  display: grid;
+  gap: 6px;
+}
+
+.whatsapp-config-item label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  opacity: 0.78;
+}
+
+.whatsapp-config-item select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+
+  border: 1px solid var(--input-border);
+  background: var(--card-bg);
+  color: var(--text-main);
+
+  font-size: 14px;
+  outline: none;
+}
+
+.whatsapp-config-item select:focus {
+  border-color: var(--accent);
+}
+
+body.dark .whatsapp-config-item select {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: var(--card-bg);
+  color: var(--text-main);
+}
+
+body.dark .whatsapp-config-item select:focus {
+  border-color: var(--accent);
+}
+
+@media (min-width: 700px) {
+  .whatsapp-config-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+/* ===== FIM — WHATSAPP — CONFIGURAÇÃO NO MODAL ===== */

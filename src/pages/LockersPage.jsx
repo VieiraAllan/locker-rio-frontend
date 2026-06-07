@@ -4,13 +4,13 @@ import Modal from '../components/Modal';
 
 import {
   getLockers,
-  getLocacoesAtivas,
-  criarLocacao,
   getLocacaoAtiva,
+  criarLocacao,
   finalizarLocacao,
-  gerarLinkWhatsAppFinalizacao,
+  gerarMensagemWhatsApp,
   getAvulsasAtivas,
-  getConfiguracoes
+  getConfiguracoes,
+  getLocacoesAtivas
 } from '../services/api';
 
 function LockersPage({ showToast, usuarioAtual }) {
@@ -45,6 +45,8 @@ function LockersPage({ showToast, usuarioAtual }) {
   const [valorExcedente, setValorExcedente] = useState('');
   const [valorPagoFinal, setValorPagoFinal] = useState('');
   const [telefoneWhatsApp, setTelefoneWhatsApp] = useState('');
+  const [tipoMensagemWhatsApp, setTipoMensagemWhatsApp] = useState('finalizacao');
+  const [idiomaMensagemWhatsApp, setIdiomaMensagemWhatsApp] = useState('pt');
 
   const nomeRef = useRef(null);
   const telefoneRef = useRef(null);
@@ -55,13 +57,6 @@ function LockersPage({ showToast, usuarioAtual }) {
     (total, b) => total + b.quantidade,
     0
   );
-
-  function formatarMoeda(valor) {
-    return Number(valor || 0).toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    });
-  }
 
   function formatarData(data) {
     if (!data) return '-';
@@ -237,10 +232,21 @@ const totalAvulsas = avulsas.length;
   }, []);
 
   useEffect(() => {
-    if (modalType === 'nova') {
-      setTimeout(() => nomeRef.current?.focus(), 0);
+  if (modalType === 'nova') {
+    setTimeout(() => nomeRef.current?.focus(), 0);
+  }
+}, [modalType]);
+
+  useEffect(() => {
+    if (modalType === 'finalizar') {
+      const telefonePadrao =
+        selectedLocacao?.cliente_telefone ||
+        selectedAvulsa?.cliente_telefone ||
+        '';
+
+      setTelefoneWhatsApp(telefonePadrao);
     }
-  }, [modalType]);
+  }, [modalType, selectedLocacao, selectedAvulsa]);
 
   function resetModal() {
     setSubmitting(false);
@@ -259,6 +265,8 @@ const totalAvulsas = avulsas.length;
     setValorExcedente('');
     setValorPagoFinal('');
     setTelefoneWhatsApp('');
+    setTipoMensagemWhatsApp('finalizacao');
+    setIdiomaMensagemWhatsApp('pt');
   }
 
   function handleLockerClick(locker) {
@@ -467,10 +475,15 @@ const totalAvulsas = avulsas.length;
       await carregarLockers();
 
       if (telefoneWhatsApp.trim()) {
-        window.open(
-          gerarLinkWhatsAppFinalizacao(locacaoId, telefoneWhatsApp),
-          '_blank'
-        );
+        const resultadoMensagem = await gerarMensagemWhatsApp(locacaoId, {
+          tipo: tipoMensagemWhatsApp,
+          idioma: idiomaMensagemWhatsApp,
+          telefone: telefoneWhatsApp.trim()
+        });
+
+        if (resultadoMensagem?.whatsapp_link) {
+          window.open(resultadoMensagem.whatsapp_link, '_blank');
+        }
       }
 
       showToast('Locação finalizada com sucesso.', 'success');
@@ -784,6 +797,32 @@ const totalAvulsas = avulsas.length;
             value={valorPagoFinal}
             onChange={e => setValorPagoFinal(e.target.value)}
           />
+
+          <div className="whatsapp-config-grid">
+            <div className="whatsapp-config-item">
+              <label>Tipo da mensagem</label>
+              <select
+                value={tipoMensagemWhatsApp}
+                onChange={e => setTipoMensagemWhatsApp(e.target.value)}
+              >
+                <option value="finalizacao">Finalização</option>
+                <option value="atraso">Atraso</option>
+                <option value="fechamento_proximo">Loja próxima de fechar</option>
+              </select>
+            </div>
+
+            <div className="whatsapp-config-item">
+              <label>Idioma</label>
+              <select
+                value={idiomaMensagemWhatsApp}
+                onChange={e => setIdiomaMensagemWhatsApp(e.target.value)}
+              >
+                <option value="pt">Português</option>
+                <option value="en">Inglês</option>
+                <option value="es">Espanhol</option>
+              </select>
+            </div>
+          </div>
 
           <input
             placeholder="Telefone para WhatsApp"
