@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import LockerCard from '../components/LockerCard';
 import Modal from '../components/Modal';
-
 import {
   getLockers,
   getLocacaoAtiva,
@@ -18,30 +17,23 @@ function LockersPage({ showToast, usuarioAtual }) {
   const [avulsas, setAvulsas] = useState([]);
   const [configuracoes, setConfiguracoes] = useState(null);
   const [loading, setLoading] = useState(true);
-
   const [selectedLocker, setSelectedLocker] = useState(null);
   const [selectedAvulsa, setSelectedAvulsa] = useState(null);
   const [selectedLocacao, setSelectedLocacao] = useState(null);
   const [locacoesAtivasDetalhes, setLocacoesAtivasDetalhes] = useState([]);
   const [modalType, setModalType] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-
   // ✅ NOVO: identifica locação sem locker
   const [isAvulsa, setIsAvulsa] = useState(false);
-
   const [clienteNome, setClienteNome] = useState('');
   const [clienteTelefone, setClienteTelefone] = useState('');
   const [clienteDocumento, setClienteDocumento] = useState('');
-
   const [valorPago, setValorPago] = useState('');
   const [lacres, setLacres] = useState('');
-
   const [inRioTour, setInRioTour] = useState(false);
-
   const [descricaoBagagem, setDescricaoBagagem] = useState('');
   const [quantidadeBagagem, setQuantidadeBagagem] = useState(1);
   const [bagagensExternas, setBagagensExternas] = useState([]);
-
   const [valorExcedente, setValorExcedente] = useState('');
   const [valorPagoFinal, setValorPagoFinal] = useState('');
   const [telefoneWhatsApp, setTelefoneWhatsApp] = useState('');
@@ -58,17 +50,37 @@ function LockersPage({ showToast, usuarioAtual }) {
     0
   );
 
+  function formatarMoeda(valor) {
+    return Number(valor || 0).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
+  }
+
   function formatarData(data) {
     if (!data) return '-';
-
     const partes = String(data).split('-');
-
     if (partes.length !== 3) {
       return data;
     }
-
     const [ano, mes, dia] = partes;
     return `${dia}/${mes}/${ano}`;
+  }
+
+  function abrirWhatsApp({ telefone, mensagem }) {
+    const apenasNumeros = String(telefone || '').replace(/\D/g, '');
+
+    if (!apenasNumeros || !mensagem) return;
+
+    const telefoneNormalizado = apenasNumeros.startsWith('55')
+      ? apenasNumeros
+      : `55${apenasNumeros}`;
+
+    const url = new URL('https://api.whatsapp.com/send');
+    url.searchParams.set('phone', telefoneNormalizado);
+    url.searchParams.set('text', mensagem);
+
+    window.open(url.toString(), '_blank', 'noopener,noreferrer');
   }
 
   const quantidadeLockersSelecionados =
@@ -98,7 +110,6 @@ function LockersPage({ showToast, usuarioAtual }) {
     }
 
     total += valorBagagemAvulsaConfigurado * totalVolumes;
-
     return total;
   })();
 
@@ -145,6 +156,7 @@ function LockersPage({ showToast, usuarioAtual }) {
     const valorPagoInicial = Number(locacao.valor_pago_inicial || 0);
     const valorPagoFinalAtual = Number(locacao.valor_pago_final || 0);
     const valorTotal = Number(locacao.valor_total || 0);
+
     const valorPendente = Math.max(
       0,
       valorTotal - valorPagoInicial - valorPagoFinalAtual
@@ -162,38 +174,25 @@ function LockersPage({ showToast, usuarioAtual }) {
 
   const resumoFinalizacao = calcularResumoFinalizacao(selectedLocacao);
 
-  function formatarMoeda(valor) {
-    return Number(valor || 0).toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    });
-  }
-
   const permitirBagagemAvulsa =
-  configuracoes?.operacao?.permitirBagagemAvulsa !== false;
-
+    configuracoes?.operacao?.permitirBagagemAvulsa !== false;
   const permitirInRioTour =
     configuracoes?.operacao?.permitirInRioTour !== false;
-
   const exigirLacres =
     configuracoes?.operacao?.exigirLacres !== false;
-
   const exigirTelefoneCliente =
     configuracoes?.operacao?.exigirTelefoneCliente !== false;
 
   const totalDisponiveis = lockers.filter(
-  locker => locker.status === 'disponivel'
-).length;
-
-const totalOcupados = lockers.filter(
-  locker => locker.status === 'ocupado'
-).length;
-
-const totalManutencao = lockers.filter(
-  locker => locker.status === 'manutencao'
-).length;
-
-const totalAvulsas = avulsas.length;
+    locker => locker.status === 'disponivel'
+  ).length;
+  const totalOcupados = lockers.filter(
+    locker => locker.status === 'ocupado'
+  ).length;
+  const totalManutencao = lockers.filter(
+    locker => locker.status === 'manutencao'
+  ).length;
+  const totalAvulsas = avulsas.length;
 
   async function carregarLockers() {
     try {
@@ -232,10 +231,10 @@ const totalAvulsas = avulsas.length;
   }, []);
 
   useEffect(() => {
-  if (modalType === 'nova') {
-    setTimeout(() => nomeRef.current?.focus(), 0);
-  }
-}, [modalType]);
+    if (modalType === 'nova') {
+      setTimeout(() => nomeRef.current?.focus(), 0);
+    }
+  }, [modalType]);
 
   useEffect(() => {
     if (modalType === 'finalizar') {
@@ -293,16 +292,16 @@ const totalAvulsas = avulsas.length;
 
   // ✅ NOVO: clique em bagagem avulsa
   function handleAvulsaClick() {
-  if (!permitirBagagemAvulsa) {
-    showToast('Bagagem avulsa está desabilitada nas configurações.', 'error');
-    return;
-  }
+    if (!permitirBagagemAvulsa) {
+      showToast('Bagagem avulsa está desabilitada nas configurações.', 'error');
+      return;
+    }
 
-  resetModal();
-  setIsAvulsa(true);
-  setSelectedLocker(null);
-  setModalType('nova');
-}
+    resetModal();
+    setIsAvulsa(true);
+    setSelectedLocker(null);
+    setModalType('nova');
+  }
 
   function handleAvulsaAtivaClick(avulsa) {
     resetModal();
@@ -343,14 +342,15 @@ const totalAvulsas = avulsas.length;
 
   async function confirmarNovaLocacao() {
     if (!usuarioAtual || !usuarioAtual.id) {
-  showToast('Usuário logado não identificado. Faça login novamente.', 'error');
-  return;
-}
+      showToast('Usuário logado não identificado. Faça login novamente.', 'error');
+      return;
+    }
+
     if (exigirTelefoneCliente && !clienteTelefone.trim()) {
-    showToast('Informe o telefone do cliente.', 'error');
-    telefoneRef.current?.focus();
-    return;
-  }
+      showToast('Informe o telefone do cliente.', 'error');
+      telefoneRef.current?.focus();
+      return;
+    }
 
     if (valorPago === '') {
       showToast('Informe o valor pago (pode ser zero).', 'error');
@@ -359,6 +359,7 @@ const totalAvulsas = avulsas.length;
     }
 
     const valorNormalizado = Number(String(valorPago).replace(',', '.'));
+
     if (Number.isNaN(valorNormalizado) || valorNormalizado < 0) {
       showToast('Valor pago inválido.', 'error');
       valorPagoRef.current?.focus();
@@ -366,15 +367,18 @@ const totalAvulsas = avulsas.length;
     }
 
     if (valorNormalizado > valorTotalLocacao) {
-      showToast('O valor pago agora não pode ser maior que o valor total da locação.', 'error');
+      showToast(
+        'O valor pago agora não pode ser maior que o valor total da locação.',
+        'error'
+      );
       valorPagoRef.current?.focus();
       return;
     }
 
     if (exigirLacres && !lacres.trim()) {
-    showToast('Informe a numeração dos lacres.', 'error');
-    lacresRef.current?.focus();
-    return;
+      showToast('Informe a numeração dos lacres.', 'error');
+      lacresRef.current?.focus();
+      return;
     }
 
     // ✅ avulsa exige bagagem
@@ -383,9 +387,7 @@ const totalAvulsas = avulsas.length;
       return;
     }
 
-    const lockerIdsPayload = isAvulsa
-      ? []
-      : [selectedLocker.id];
+    const lockerIdsPayload = isAvulsa ? [] : [selectedLocker.id];
 
     try {
       setSubmitting(true);
@@ -407,14 +409,12 @@ const totalAvulsas = avulsas.length;
       showToast('Locação criada com sucesso.', 'success');
       await carregarLockers();
       setTimeout(closeModal, 600);
-
     } catch (err) {
       showToast(err.message || 'Erro ao criar locação.', 'error');
       setSubmitting(false);
     }
   }
 
-  
   async function confirmarFinalizacao() {
     if (submitting) return;
 
@@ -423,7 +423,6 @@ const totalAvulsas = avulsas.length;
       : `Confirmar finalização da locação do armário ${selectedLocker.numero}?`;
 
     const confirmar = window.confirm(mensagemConfirmacao);
-
     if (!confirmar) return;
 
     const valorExcedenteNormalizado =
@@ -454,7 +453,10 @@ const totalAvulsas = avulsas.length;
     }
 
     if (valorPagoFinalNormalizado > resumoFinalizacao.valorPendente) {
-      showToast('O valor pago no fechamento não pode ser maior que o valor pendente.', 'error');
+      showToast(
+        'O valor pago no fechamento não pode ser maior que o valor pendente.',
+        'error'
+      );
       return;
     }
 
@@ -481,14 +483,16 @@ const totalAvulsas = avulsas.length;
           telefone: telefoneWhatsApp.trim()
         });
 
-        if (resultadoMensagem?.whatsapp_link) {
-          window.open(resultadoMensagem.whatsapp_link, '_blank');
+        if (resultadoMensagem?.mensagem) {
+          abrirWhatsApp({
+            telefone: telefoneWhatsApp.trim(),
+            mensagem: resultadoMensagem.mensagem
+          });
         }
       }
 
       showToast('Locação finalizada com sucesso.', 'success');
       setTimeout(closeModal, 600);
-
     } catch (err) {
       showToast(err.message || 'Erro ao finalizar locação.', 'error');
       setSubmitting(false);
@@ -506,31 +510,28 @@ const totalAvulsas = avulsas.length;
   return (
     <div>
       <div className="painel-container">
-  <h2>Painel de Lockers</h2>
+        <h2>Painel de Lockers</h2>
 
-  <div className="painel-resumo">
-    <div className="resumo-item resumo-disponivel">
-      <span>Disponíveis</span>
-      <strong>{totalDisponiveis}</strong>
-    </div>
+        <div className="painel-resumo">
+          <div className="resumo-item resumo-disponivel">
+            <span>Disponíveis</span>
+            <strong>{totalDisponiveis}</strong>
+          </div>
+          <div className="resumo-item resumo-ocupado">
+            <span>Ocupados</span>
+            <strong>{totalOcupados}</strong>
+          </div>
+          <div className="resumo-item resumo-manutencao">
+            <span>Manutenção</span>
+            <strong>{totalManutencao}</strong>
+          </div>
+          <div className="resumo-item resumo-avulsa">
+            <span>Avulsas</span>
+            <strong>{totalAvulsas}</strong>
+          </div>
+        </div>
 
-    <div className="resumo-item resumo-ocupado">
-      <span>Ocupados</span>
-      <strong>{totalOcupados}</strong>
-    </div>
-
-    <div className="resumo-item resumo-manutencao">
-      <span>Manutenção</span>
-      <strong>{totalManutencao}</strong>
-    </div>
-
-    <div className="resumo-item resumo-avulsa">
-      <span>Avulsas</span>
-      <strong>{totalAvulsas}</strong>
-    </div>
-  </div>
-
-  <div className="lockers-grid">
+        <div className="lockers-grid">
           {lockers.map(locker => (
             <LockerCard
               key={locker.id}
@@ -540,32 +541,27 @@ const totalAvulsas = avulsas.length;
             />
           ))}
 
-          {/*✅ CARD BAGAGEM AVULSA*/}
+          {/* ✅ CARD BAGAGEM AVULSA */}
           {permitirBagagemAvulsa && (
-          <div
-            className="avulsa-add-card"
-            onClick={handleAvulsaClick}
-          >
-            + 📦 Bagagem avulsa
-          </div>
+            <div className="avulsa-add-card" onClick={handleAvulsaClick}>
+              + 📦 Bagagem avulsa
+            </div>
           )}
 
-          {/*✅ LISTAGEM DE BAGAGENS AVULSAS ATIVAS*/}
-          
-    {avulsas.map(avulsa => (
-      <div
-        key={avulsa.id}
-        className="avulsa-card"
-        onClick={() => handleAvulsaAtivaClick(avulsa)}
-      >
-        📦 {avulsa.cliente_nome} ({avulsa.total_volumes})
-      </div>
-        ))}
-
+          {/* ✅ LISTAGEM DE BAGAGENS AVULSAS ATIVAS */}
+          {avulsas.map(avulsa => (
+            <div
+              key={avulsa.id}
+              className="avulsa-card"
+              onClick={() => handleAvulsaAtivaClick(avulsa)}
+            >
+              📦 {avulsa.cliente_nome} ({avulsa.total_volumes})
+            </div>
+          ))}
         </div>
       </div>
 
-      {/*NOVA LOCAÇÃO*/}
+      {/* NOVA LOCAÇÃO */}
       <Modal
         key={isAvulsa ? 'modal-nova-avulsa' : 'modal-nova-locker'}
         isOpen={modalType === 'nova'}
@@ -578,18 +574,29 @@ const totalAvulsas = avulsas.length;
         onConfirm={confirmarNovaLocacao}
         confirmDisabled={submitting}
       >
-        <input ref={nomeRef} placeholder="Nome completo" value={clienteNome} onChange={e => setClienteNome(e.target.value)} />
         <input
-            ref={telefoneRef}
-            placeholder={
-              exigirTelefoneCliente
-                ? 'Telefone (WhatsApp)'
-                : 'Telefone (WhatsApp) — opcional'
-            }
-            value={clienteTelefone}
-            onChange={e => setClienteTelefone(e.target.value)}
+          ref={nomeRef}
+          placeholder="Nome completo"
+          value={clienteNome}
+          onChange={e => setClienteNome(e.target.value)}
         />
-        <input placeholder="Documento / Observação" value={clienteDocumento} onChange={e => setClienteDocumento(e.target.value)} />
+
+        <input
+          ref={telefoneRef}
+          placeholder={
+            exigirTelefoneCliente
+              ? 'Telefone (WhatsApp)'
+              : 'Telefone (WhatsApp) — opcional'
+          }
+          value={clienteTelefone}
+          onChange={e => setClienteTelefone(e.target.value)}
+        />
+
+        <input
+          placeholder="Documento / Observação"
+          value={clienteDocumento}
+          onChange={e => setClienteDocumento(e.target.value)}
+        />
 
         <div className="valor-locacao-resumo">
           <span>Valor total da locação</span>
@@ -602,7 +609,7 @@ const totalAvulsas = avulsas.length;
           value={valorPago}
           onChange={e => setValorPago(e.target.value)}
         />
-        
+
         <input
           ref={lacresRef}
           placeholder={
@@ -615,24 +622,35 @@ const totalAvulsas = avulsas.length;
         />
 
         {permitirInRioTour && (
-        <label className="checkbox-row">
-          <input type="checkbox"
-          checked={inRioTour}
-          onChange={e => setInRioTour(e.target.checked)}
-          />
-          Cliente In Rio Tour
-        </label>
+          <label className="checkbox-row">
+            <input
+              type="checkbox"
+              checked={inRioTour}
+              onChange={e => setInRioTour(e.target.checked)}
+            />
+            Cliente In Rio Tour
+          </label>
         )}
 
         <h4>Bagagens externas</h4>
 
-        <input placeholder="Descrição da bagagem" value={descricaoBagagem} onChange={e => setDescricaoBagagem(e.target.value)} />
-        <input type="number" min="1" value={quantidadeBagagem} onChange={e => setQuantidadeBagagem(Number(e.target.value))} />
+        <input
+          placeholder="Descrição da bagagem"
+          value={descricaoBagagem}
+          onChange={e => setDescricaoBagagem(e.target.value)}
+        />
 
-        <button type="button" onClick={adicionarBagagem}>Adicionar bagagem</button>
+        <input
+          type="number"
+          min="1"
+          value={quantidadeBagagem}
+          onChange={e => setQuantidadeBagagem(Number(e.target.value))}
+        />
 
-        
-            
+        <button type="button" onClick={adicionarBagagem}>
+          Adicionar bagagem
+        </button>
+
         {bagagensExternas.length > 0 && (
           <ul className="bagagens-lista">
             {bagagensExternas.map((b, i) => (
@@ -640,7 +658,6 @@ const totalAvulsas = avulsas.length;
                 <span className="bagagem-info">
                   {b.descricao} — {b.quantidade}
                 </span>
-
                 <button
                   type="button"
                   className="bagagem-remover"
@@ -657,8 +674,6 @@ const totalAvulsas = avulsas.length;
           </ul>
         )}
 
-
-
         {bagagensExternas.length > 0 && (
           <p>Total de volumes: {totalVolumes}</p>
         )}
@@ -669,173 +684,157 @@ const totalAvulsas = avulsas.length;
       </Modal>
 
       {/* FINALIZAR LOCAÇÃO */}
-    <Modal
-      isOpen={modalType === 'finalizar'}
-      title={
-        isAvulsa
-          ? `Finalizar bagagem avulsa - ${selectedAvulsa?.cliente_nome}`
-          : `Finalizar locação - Armário ${selectedLocker?.numero}`
-      }
-      onClose={closeModal}
-      onConfirm={confirmarFinalizacao}
-      confirmDisabled={submitting}
-    >
-      <div className="finalizacao-grid">
-        <section className="finalizacao-card">
-          <h4>Identificação</h4>
+      <Modal
+        isOpen={modalType === 'finalizar'}
+        title={
+          isAvulsa
+            ? `Finalizar bagagem avulsa - ${selectedAvulsa?.cliente_nome}`
+            : `Finalizar locação - Armário ${selectedLocker?.numero}`
+        }
+        onClose={closeModal}
+        onConfirm={confirmarFinalizacao}
+        confirmDisabled={submitting}
+      >
+        <div className="finalizacao-grid">
+          <section className="finalizacao-card">
+            <h4>Identificação</h4>
+            <div className="finalizacao-info-lista">
+              <div>
+                <span>Cliente</span>
+                <strong>{selectedLocacao?.cliente_nome || selectedAvulsa?.cliente_nome || '-'}</strong>
+              </div>
+              <div>
+                <span>Recibo</span>
+                <strong>{selectedLocacao?.recibo_numero || '-'}</strong>
+              </div>
+              <div>
+                <span>Telefone</span>
+                <strong>{selectedLocacao?.cliente_telefone || '-'}</strong>
+              </div>
+              <div>
+                <span>Tipo</span>
+                <strong>{selectedLocacao?.tipo === 'avulsa' ? 'Bagagem avulsa' : 'Locker'}</strong>
+              </div>
+              <div>
+                <span>Armário(s)</span>
+                <strong>
+                  {selectedLocacao?.tipo === 'avulsa'
+                    ? '-'
+                    : selectedLocacao?.lockers?.join(', ') || selectedLocker?.numero || '-'}
+                </strong>
+              </div>
+            </div>
+          </section>
 
-          <div className="finalizacao-info-lista">
-            <div>
-              <span>Cliente</span>
-              <strong>{selectedLocacao?.cliente_nome || selectedAvulsa?.cliente_nome || '-'}</strong>
+          <section className="finalizacao-card">
+            <h4>Resumo da locação</h4>
+            <div className="finalizacao-info-lista">
+              <div>
+                <span>Data</span>
+                <strong>{formatarData(selectedLocacao?.data)}</strong>
+              </div>
+              <div>
+                <span>Entrada</span>
+                <strong>{selectedLocacao?.hora_entrada || '-'}</strong>
+              </div>
+              <div>
+                <span>Pago até</span>
+                <strong>{selectedLocacao?.hora_pago_ate || '-'}</strong>
+              </div>
+              <div>
+                <span>Lacres</span>
+                <strong>{selectedLocacao?.lacres || '-'}</strong>
+              </div>
+              <div>
+                <span>Volumes extras</span>
+                <strong>{selectedLocacao?.total_volumes || 0}</strong>
+              </div>
+              <div>
+                <span>Aberta por</span>
+                <strong>
+                  {selectedLocacao?.usuario_abertura_nome
+                    ? `${selectedLocacao.usuario_abertura_nome} — ${selectedLocacao.usuario_abertura_perfil}`
+                    : '-'}
+                </strong>
+              </div>
+              <div>
+                <span>Horas excedentes</span>
+                <strong>{resumoFinalizacao.horasExcedentes}</strong>
+              </div>
+              <div>
+                <span>Excedente sugerido</span>
+                <strong>{formatarMoeda(resumoFinalizacao.valorExcedenteSugerido)}</strong>
+              </div>
+            </div>
+          </section>
+
+          <section className="finalizacao-card finalizacao-card-financeiro">
+            <h4>Financeiro</h4>
+            <div className="finalizacao-metricas">
+              <div className="finalizacao-metrica">
+                <span>Valor total</span>
+                <strong>{formatarMoeda(resumoFinalizacao.valorTotal)}</strong>
+              </div>
+              <div className="finalizacao-metrica">
+                <span>Pago na abertura</span>
+                <strong>{formatarMoeda(resumoFinalizacao.valorPagoInicial)}</strong>
+              </div>
+              <div className="finalizacao-metrica destaque">
+                <span>Valor pendente</span>
+                <strong>{formatarMoeda(resumoFinalizacao.valorPendente)}</strong>
+              </div>
             </div>
 
-            <div>
-              <span>Recibo</span>
-              <strong>{selectedLocacao?.recibo_numero || '-'}</strong>
+            <input
+              placeholder="Valor do excedente (opcional)"
+              value={valorExcedente}
+              onChange={e => setValorExcedente(e.target.value)}
+            />
+
+            <input
+              placeholder="Valor pago no fechamento"
+              value={valorPagoFinal}
+              onChange={e => setValorPagoFinal(e.target.value)}
+            />
+
+            <div className="whatsapp-config-grid">
+              <div className="whatsapp-config-item">
+                <label>Tipo da mensagem</label>
+                <select
+                  value={tipoMensagemWhatsApp}
+                  onChange={e => setTipoMensagemWhatsApp(e.target.value)}
+                >
+                  <option value="finalizacao">Finalização</option>
+                  <option value="atraso">Atraso</option>
+                  <option value="fechamento_proximo">Loja próxima de fechar</option>
+                </select>
+              </div>
+
+              <div className="whatsapp-config-item">
+                <label>Idioma</label>
+                <select
+                  value={idiomaMensagemWhatsApp}
+                  onChange={e => setIdiomaMensagemWhatsApp(e.target.value)}
+                >
+                  <option value="pt">Português</option>
+                  <option value="en">Inglês</option>
+                  <option value="es">Espanhol</option>
+                </select>
+              </div>
             </div>
 
-            <div>
-              <span>Telefone</span>
-              <strong>{selectedLocacao?.cliente_telefone || '-'}</strong>
-            </div>
+            <input
+              placeholder="Telefone para WhatsApp"
+              value={telefoneWhatsApp}
+              onChange={e => setTelefoneWhatsApp(e.target.value)}
+            />
+          </section>
+        </div>
 
-            <div>
-              <span>Tipo</span>
-              <strong>{selectedLocacao?.tipo === 'avulsa' ? 'Bagagem avulsa' : 'Locker'}</strong>
-            </div>
-
-            <div>
-              <span>Armário(s)</span>
-              <strong>
-                {selectedLocacao?.tipo === 'avulsa'
-                  ? '-'
-                  : selectedLocacao?.lockers?.join(', ') || selectedLocker?.numero || '-'}
-              </strong>
-            </div>
-          </div>
-        </section>
-
-        <section className="finalizacao-card">
-          <h4>Resumo da locação</h4>
-
-          <div className="finalizacao-info-lista">
-            <div>
-              <span>Data</span>
-              <strong>{formatarData(selectedLocacao?.data)}</strong>
-            </div>
-
-            <div>
-              <span>Entrada</span>
-              <strong>{selectedLocacao?.hora_entrada || '-'}</strong>
-            </div>
-
-            <div>
-              <span>Pago até</span>
-              <strong>{selectedLocacao?.hora_pago_ate || '-'}</strong>
-            </div>
-
-            <div>
-              <span>Lacres</span>
-              <strong>{selectedLocacao?.lacres || '-'}</strong>
-            </div>
-
-            <div>
-              <span>Volumes extras</span>
-              <strong>{selectedLocacao?.total_volumes || 0}</strong>
-            </div>
-
-            <div>
-              <span>Aberta por</span>
-              <strong>
-                {selectedLocacao?.usuario_abertura_nome
-                  ? `${selectedLocacao.usuario_abertura_nome} — ${selectedLocacao.usuario_abertura_perfil}`
-                  : '-'}
-              </strong>
-            </div>
-
-            <div>
-              <span>Horas excedentes</span>
-              <strong>{resumoFinalizacao.horasExcedentes}</strong>
-            </div>
-
-            <div>
-              <span>Excedente sugerido</span>
-              <strong>{formatarMoeda(resumoFinalizacao.valorExcedenteSugerido)}</strong>
-            </div>
-          </div>
-        </section>
-
-        <section className="finalizacao-card finalizacao-card-financeiro">
-          <h4>Financeiro</h4>
-
-          <div className="finalizacao-metricas">
-            <div className="finalizacao-metrica">
-              <span>Valor total</span>
-              <strong>{formatarMoeda(resumoFinalizacao.valorTotal)}</strong>
-            </div>
-
-            <div className="finalizacao-metrica">
-              <span>Pago na abertura</span>
-              <strong>{formatarMoeda(resumoFinalizacao.valorPagoInicial)}</strong>
-            </div>
-
-            <div className="finalizacao-metrica destaque">
-              <span>Valor pendente</span>
-              <strong>{formatarMoeda(resumoFinalizacao.valorPendente)}</strong>
-            </div>
-          </div>
-
-          <input
-            placeholder="Valor do excedente (opcional)"
-            value={valorExcedente}
-            onChange={e => setValorExcedente(e.target.value)}
-          />
-
-          <input
-            placeholder="Valor pago no fechamento"
-            value={valorPagoFinal}
-            onChange={e => setValorPagoFinal(e.target.value)}
-          />
-
-          <div className="whatsapp-config-grid">
-            <div className="whatsapp-config-item">
-              <label>Tipo da mensagem</label>
-              <select
-                value={tipoMensagemWhatsApp}
-                onChange={e => setTipoMensagemWhatsApp(e.target.value)}
-              >
-                <option value="finalizacao">Finalização</option>
-                <option value="atraso">Atraso</option>
-                <option value="fechamento_proximo">Loja próxima de fechar</option>
-              </select>
-            </div>
-
-            <div className="whatsapp-config-item">
-              <label>Idioma</label>
-              <select
-                value={idiomaMensagemWhatsApp}
-                onChange={e => setIdiomaMensagemWhatsApp(e.target.value)}
-              >
-                <option value="pt">Português</option>
-                <option value="en">Inglês</option>
-                <option value="es">Espanhol</option>
-              </select>
-            </div>
-          </div>
-
-          <input
-            placeholder="Telefone para WhatsApp"
-            value={telefoneWhatsApp}
-            onChange={e => setTelefoneWhatsApp(e.target.value)}
-          />
-        </section>
-      </div>
-
-      <button onClick={confirmarFinalizacao} disabled={submitting}>
-        {submitting ? 'Finalizando...' : 'Finalizar locação'}
-      </button>
-    </Modal>
+        <button onClick={confirmarFinalizacao} disabled={submitting}>
+          {submitting ? 'Finalizando...' : 'Finalizar locação'}
+        </button>
+      </Modal>
     </div>
   );
 }
