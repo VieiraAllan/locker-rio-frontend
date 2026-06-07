@@ -3575,3 +3575,27 @@ body.dark .locacao-recibo-btn:hover:not(:disabled) {
   }
 }
 /* ===== FIM — LOCAÇÕES ATIVAS — BOTÃO RECIBO PDF ===== */
+
+/* ======================================================
+   FINALIZAÇÃO — RESUMO NO MODAL
+====================================================== */
+.finalizacao-resumo {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--input-border);
+}
+
+.finalizacao-resumo span {
+  display: block;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-main);
+  opacity: 0.85;
+}
+
+body.dark .finalizacao-resumo {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}

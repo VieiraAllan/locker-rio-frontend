@@ -40,6 +40,7 @@ function LockersPage({ showToast, usuarioAtual }) {
   const [bagagensExternas, setBagagensExternas] = useState([]);
 
   const [valorExcedente, setValorExcedente] = useState('');
+  const [valorPagoFinal, setValorPagoFinal] = useState('');
   const [telefoneWhatsApp, setTelefoneWhatsApp] = useState('');
 
   const nomeRef = useRef(null);
@@ -161,6 +162,7 @@ const totalAvulsas = avulsas.length;
     setQuantidadeBagagem(1);
     setBagagensExternas([]);
     setValorExcedente('');
+    setValorPagoFinal('');
     setTelefoneWhatsApp('');
   }
 
@@ -299,6 +301,33 @@ async function confirmarFinalizacao() {
 
   if (!confirmar) return;
 
+  const valorExcedenteNormalizado =
+    valorExcedente.trim() === ''
+      ? null
+      : Number(String(valorExcedente).replace(',', '.'));
+
+  if (
+    valorExcedenteNormalizado !== null &&
+    (Number.isNaN(valorExcedenteNormalizado) || valorExcedenteNormalizado < 0)
+  ) {
+    showToast('Valor do excedente inválido.', 'error');
+    return;
+  }
+
+  if (valorPagoFinal.trim() === '') {
+    showToast('Informe o valor pago no fechamento (pode ser zero).', 'error');
+    return;
+  }
+
+  const valorPagoFinalNormalizado = Number(
+    String(valorPagoFinal).replace(',', '.')
+  );
+
+  if (Number.isNaN(valorPagoFinalNormalizado) || valorPagoFinalNormalizado < 0) {
+    showToast('Valor pago no fechamento inválido.', 'error');
+    return;
+  }
+
   try {
     setSubmitting(true);
 
@@ -306,15 +335,14 @@ async function confirmarFinalizacao() {
       ? selectedAvulsa.id
       : await getLocacaoAtiva(selectedLocker.id);
 
-    const valor =
-      inRioTour && valorExcedente
-        ? Number(String(valorExcedente).replace(',', '.'))
-        : null;
+    await finalizarLocacao(locacaoId, {
+      valor_excedente_manual: valorExcedenteNormalizado,
+      valor_pago_final: valorPagoFinalNormalizado
+    });
 
-    await finalizarLocacao(locacaoId, valor);
     await carregarLockers();
 
-    if (telefoneWhatsApp) {
+    if (telefoneWhatsApp.trim()) {
       window.open(
         gerarLinkWhatsAppFinalizacao(locacaoId, telefoneWhatsApp),
         '_blank'
@@ -329,7 +357,6 @@ async function confirmarFinalizacao() {
     setSubmitting(false);
   }
 }
-
 
   if (loading) {
     return (
@@ -516,27 +543,35 @@ async function confirmarFinalizacao() {
       onConfirm={confirmarFinalizacao}
       confirmDisabled={submitting}
     >
-        {permitirInRioTour && (
-        <label className="checkbox-row">
-          <input
-          type="checkbox"
-          checked={inRioTour}
-          onChange={e => setInRioTour(e.target.checked)}
-          />
-          Cliente In Rio Tour
-        </label>
-        )}
+      <div className="finalizacao-resumo">
+        <span>
+          Informe abaixo o valor pago no fechamento e, se necessário,
+          um ajuste manual do excedente.
+        </span>
+      </div>
 
-        {inRioTour && (
-          <input placeholder="Valor do excedente" value={valorExcedente} onChange={e => setValorExcedente(e.target.value)} />
-        )}
+      <input
+        placeholder="Valor do excedente (opcional)"
+        value={valorExcedente}
+        onChange={e => setValorExcedente(e.target.value)}
+      />
 
-        <input placeholder="Telefone para WhatsApp" value={telefoneWhatsApp} onChange={e => setTelefoneWhatsApp(e.target.value)} />
+      <input
+        placeholder="Valor pago no fechamento"
+        value={valorPagoFinal}
+        onChange={e => setValorPagoFinal(e.target.value)}
+      />
 
-        <button onClick={confirmarFinalizacao} disabled={submitting}>
-          {submitting ? 'Finalizando...' : 'Finalizar locação'}
-        </button>
-      </Modal>
+      <input
+        placeholder="Telefone para WhatsApp (com DDI e DDD)"
+        value={telefoneWhatsApp}
+        onChange={e => setTelefoneWhatsApp(e.target.value)}
+      />
+
+      <button onClick={confirmarFinalizacao} disabled={submitting}>
+        {submitting ? 'Finalizando...' : 'Finalizar locação'}
+      </button>
+    </Modal>
     </div>
   );
 }

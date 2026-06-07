@@ -60,21 +60,20 @@ export async function getLocacaoAtiva(lockerId) {
 /* =========================
    FINALIZAR LOCAÇÃO
 ========================= */
-export async function finalizarLocacao(
-  locacaoId,
-  valorExcedenteManual = null
-) {
-  const response = await fetch(
-    `${API_URL}/locacoes/${locacaoId}/finalizar`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:
-        valorExcedenteManual !== null
-          ? JSON.stringify({ valor_excedente_manual: valorExcedenteManual })
-          : JSON.stringify({})
-    }
-  );
+export async function finalizarLocacao(locacaoId, payload = {}) {
+  const dados = payload || {};
+
+  const response = await fetch(`${API_URL}/locacoes/${locacaoId}/finalizar`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders()
+    },
+    body: JSON.stringify({
+      valor_excedente_manual: dados.valor_excedente_manual ?? null,
+      valor_pago_final: dados.valor_pago_final ?? null
+    })
+  });
 
   const data = await response.json();
 
