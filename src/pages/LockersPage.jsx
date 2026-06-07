@@ -792,7 +792,7 @@ function LockersPage({ showToast, usuarioAtual }) {
             />
 
             <input
-              placeholder="Valor pago no fechamento"
+              placeholder="Valor pago no fechamento*"
               value={valorPagoFinal}
               onChange={e => setValorPagoFinal(e.target.value)}
             />
