@@ -85,10 +85,61 @@ export async function finalizarLocacao(locacaoId, payload = {}) {
 }
 
 /* =========================
-   WHATSAPP / PDF
+   WHATSAPP / MENSAGENS
 ========================= */
-export function gerarLinkWhatsAppFinalizacao(locacaoId, telefone) {
-  return `${API_URL}/mensagens/${locacaoId}/finalizacao?telefone=${telefone}`;
+export async function gerarMensagemWhatsApp(
+  locacaoId,
+  {
+    tipo = 'finalizacao',
+    idioma = 'pt',
+    telefone = ''
+  } = {}
+) {
+  const params = new URLSearchParams();
+
+  if (telefone) {
+    params.set('telefone', telefone);
+  }
+
+  if (idioma) {
+    params.set('idioma', idioma);
+  }
+
+  const response = await fetch(
+    `${API_URL}/mensagens/${locacaoId}/${tipo}?${params.toString()}`,
+    {
+      headers: {
+        ...getAuthHeaders()
+      }
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Erro ao gerar mensagem do WhatsApp');
+  }
+
+  return data.data;
+}
+
+/* ===== compatibilidade temporária ===== */
+export function gerarLinkWhatsAppFinalizacao(
+  locacaoId,
+  telefone,
+  idioma = 'pt'
+) {
+  const params = new URLSearchParams();
+
+  if (telefone) {
+    params.set('telefone', telefone);
+  }
+
+  if (idioma) {
+    params.set('idioma', idioma);
+  }
+
+  return `${API_URL}/mensagens/${locacaoId}/finalizacao?${params.toString()}`;
 }
 
 /* =========================
