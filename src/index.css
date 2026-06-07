@@ -3599,3 +3599,335 @@ body.dark .finalizacao-resumo {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(255, 255, 255, 0.08);
 }
+
+/* ======================================================
+   FINALIZAÇÃO — MODAL COMPLETO
+====================================================== */
+.finalizacao-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.finalizacao-card {
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--input-border);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.finalizacao-card h4 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.finalizacao-info-lista {
+  display: grid;
+  gap: 10px;
+}
+
+.finalizacao-info-lista div {
+  display: grid;
+  gap: 2px;
+}
+
+.finalizacao-info-lista span {
+  font-size: 12px;
+  opacity: 0.72;
+}
+
+.finalizacao-info-lista strong {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.finalizacao-card-financeiro {
+  display: grid;
+  gap: 10px;
+}
+
+.finalizacao-metricas {
+  display: grid;
+  gap: 10px;
+}
+
+.finalizacao-metrica {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--input-border);
+  background: var(--card-bg);
+}
+
+.finalizacao-metrica span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  opacity: 0.72;
+}
+
+.finalizacao-metrica strong {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.finalizacao-metrica.destaque {
+  border-color: var(--accent);
+  background: rgba(30, 127, 92, 0.08);
+}
+
+body.dark .finalizacao-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark .finalizacao-metrica {
+  background: var(--card-bg);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark .finalizacao-metrica.destaque {
+  background: rgba(77, 214, 163, 0.08);
+  border-color: var(--accent);
+}
+/* ===== FIM — FINALIZAÇÃO — MODAL COMPLETO ===== */
+
+/* ======================================================
+   MODAL — RESPONSIVO E ROLÁVEL
+====================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.45);
+
+  overflow-y: auto;
+}
+
+.modal {
+  width: min(960px, 100%);
+  max-height: calc(100vh - 40px);
+
+  display: flex;
+  flex-direction: column;
+
+  background: var(--card-bg, #ffffff);
+  border-radius: 18px;
+  border: 1px solid var(--input-border, rgba(0, 0, 0, 0.08));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--input-border);
+  background: var(--card-bg, #ffffff);
+
+  flex-shrink: 0;
+}
+
+.modal-header span {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.modal-header button {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+
+  border: 1px solid var(--input-border);
+  background: var(--card-bg, #ffffff);
+  color: var(--text-main);
+
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.modal-header button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+}
+
+.modal-header button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.modal-body {
+  padding: 18px;
+  overflow-y: auto;
+  max-height: calc(100vh - 140px);
+
+  display: grid;
+  gap: 12px;
+}
+
+body.dark .modal {
+  background: var(--card-bg);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+
+body.dark .modal-header {
+  background: var(--card-bg);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark .modal-header button {
+  background: var(--card-bg);
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark .modal-header button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(77, 214, 163, 0.08);
+}
+
+@media (max-width: 768px) {
+  .modal-overlay {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .modal {
+    width: 100%;
+    max-height: calc(100vh - 24px);
+    border-radius: 16px;
+  }
+
+  .modal-header {
+    padding: 14px 16px;
+  }
+
+  .modal-body {
+    padding: 14px;
+    max-height: calc(100vh - 110px);
+  }
+}
+
+/* ======================================================
+   FINALIZAÇÃO — MODAL COMPLETO
+====================================================== */
+.finalizacao-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+.finalizacao-card {
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--input-border);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.finalizacao-card h4 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.finalizacao-info-lista {
+  display: grid;
+  gap: 10px;
+}
+
+.finalizacao-info-lista div {
+  display: grid;
+  gap: 2px;
+}
+
+.finalizacao-info-lista span {
+  font-size: 12px;
+  opacity: 0.72;
+}
+
+.finalizacao-info-lista strong {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.finalizacao-card-financeiro {
+  display: grid;
+  gap: 10px;
+}
+
+.finalizacao-metricas {
+  display: grid;
+  gap: 10px;
+}
+
+.finalizacao-metrica {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--input-border);
+  background: var(--card-bg);
+}
+
+.finalizacao-metrica span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  opacity: 0.72;
+}
+
+.finalizacao-metrica strong {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.finalizacao-metrica.destaque {
+  border-color: var(--accent);
+  background: rgba(30, 127, 92, 0.08);
+}
+
+body.dark .finalizacao-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark .finalizacao-metrica {
+  background: var(--card-bg);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark .finalizacao-metrica.destaque {
+  background: rgba(77, 214, 163, 0.08);
+  border-color: var(--accent);
+}
+
+@media (min-width: 900px) {
+  .finalizacao-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .finalizacao-card-financeiro {
+    grid-column: 1 / -1;
+  }
+}
+/* ===== FIM — MODAL — RESPONSIVO E FINALIZAÇÃO ===== */

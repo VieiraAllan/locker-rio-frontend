@@ -4,6 +4,7 @@ import Modal from '../components/Modal';
 
 import {
   getLockers,
+  getLocacoesAtivas,
   criarLocacao,
   getLocacaoAtiva,
   finalizarLocacao,
@@ -20,6 +21,8 @@ function LockersPage({ showToast, usuarioAtual }) {
 
   const [selectedLocker, setSelectedLocker] = useState(null);
   const [selectedAvulsa, setSelectedAvulsa] = useState(null);
+  const [selectedLocacao, setSelectedLocacao] = useState(null);
+  const [locacoesAtivasDetalhes, setLocacoesAtivasDetalhes] = useState([]);
   const [modalType, setModalType] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -53,6 +56,26 @@ function LockersPage({ showToast, usuarioAtual }) {
     0
   );
 
+  function formatarMoeda(valor) {
+    return Number(valor || 0).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
+  }
+
+  function formatarData(data) {
+    if (!data) return '-';
+
+    const partes = String(data).split('-');
+
+    if (partes.length !== 3) {
+      return data;
+    }
+
+    const [ano, mes, dia] = partes;
+    return `${dia}/${mes}/${ano}`;
+  }
+
   const quantidadeLockersSelecionados =
     isAvulsa || !selectedLocker ? 0 : 1;
 
@@ -62,6 +85,10 @@ function LockersPage({ showToast, usuarioAtual }) {
 
   const valorBagagemAvulsaConfigurado = Number(
     configuracoes?.operacao?.valorBagagemAvulsa ?? 30
+  );
+
+  const valorHoraExcedenteConfigurado = Number(
+    configuracoes?.operacao?.valorHoraExcedente ?? 5
   );
 
   const valorTotalLocacao = (() => {
@@ -79,6 +106,66 @@ function LockersPage({ showToast, usuarioAtual }) {
 
     return total;
   })();
+
+  function calcularResumoFinalizacao(locacao) {
+    if (!locacao) {
+      return {
+        horasExcedentes: 0,
+        valorExcedenteSugerido: 0,
+        valorPagoInicial: 0,
+        valorPagoFinalAtual: 0,
+        valorTotal: 0,
+        valorPendente: 0
+      };
+    }
+
+    const agora = new Date();
+    const dataHoraPagoAte = new Date(`${locacao.data}T${locacao.hora_pago_ate}`);
+
+    if (
+      locacao.hora_entrada &&
+      locacao.hora_pago_ate &&
+      String(locacao.hora_pago_ate) < String(locacao.hora_entrada)
+    ) {
+      dataHoraPagoAte.setDate(dataHoraPagoAte.getDate() + 1);
+    }
+
+    const diffMs = agora - dataHoraPagoAte;
+    const horasExcedentes =
+      diffMs <= 0 ? 0 : Math.floor(diffMs / (1000 * 60 * 60));
+
+    const quantidadeLockers = Array.isArray(locacao.lockers)
+      ? locacao.lockers.length
+      : 0;
+
+    const quantidadeVolumesExtras = Number(locacao.total_volumes || 0);
+
+    const valorExcedenteSugerido =
+      horasExcedentes > 0
+        ? horasExcedentes *
+          valorHoraExcedenteConfigurado *
+          (quantidadeLockers + quantidadeVolumesExtras)
+        : 0;
+
+    const valorPagoInicial = Number(locacao.valor_pago_inicial || 0);
+    const valorPagoFinalAtual = Number(locacao.valor_pago_final || 0);
+    const valorTotal = Number(locacao.valor_total || 0);
+    const valorPendente = Math.max(
+      0,
+      valorTotal - valorPagoInicial - valorPagoFinalAtual
+    );
+
+    return {
+      horasExcedentes,
+      valorExcedenteSugerido,
+      valorPagoInicial,
+      valorPagoFinalAtual,
+      valorTotal,
+      valorPendente
+    };
+  }
+
+  const resumoFinalizacao = calcularResumoFinalizacao(selectedLocacao);
 
   function formatarMoeda(valor) {
     return Number(valor || 0).toLocaleString('pt-BR', {
@@ -114,29 +201,36 @@ const totalManutencao = lockers.filter(
 const totalAvulsas = avulsas.length;
 
   async function carregarLockers() {
-  try {
-    const dados = await getLockers();
-    setLockers(dados);
-  } catch {
-    setLockers([]);
-  }
+    try {
+      const dados = await getLockers();
+      setLockers(dados);
+    } catch {
+      setLockers([]);
+    }
 
-  try {
-    const dadosAvulsas = await getAvulsasAtivas();
-    setAvulsas(dadosAvulsas);
-  } catch {
-    setAvulsas([]);
-  }
+    try {
+      const dadosLocacoesAtivas = await getLocacoesAtivas();
+      setLocacoesAtivasDetalhes(dadosLocacoesAtivas);
+    } catch {
+      setLocacoesAtivasDetalhes([]);
+    }
 
-  try {
-    const dadosConfiguracoes = await getConfiguracoes();
-    setConfiguracoes(dadosConfiguracoes);
-  } catch {
-    setConfiguracoes(null);
-  }
+    try {
+      const dadosAvulsas = await getAvulsasAtivas();
+      setAvulsas(dadosAvulsas);
+    } catch {
+      setAvulsas([]);
+    }
 
-  setLoading(false);
-}
+    try {
+      const dadosConfiguracoes = await getConfiguracoes();
+      setConfiguracoes(dadosConfiguracoes);
+    } catch {
+      setConfiguracoes(null);
+    }
+
+    setLoading(false);
+  }
 
   useEffect(() => {
     carregarLockers();
@@ -152,6 +246,7 @@ const totalAvulsas = avulsas.length;
     setSubmitting(false);
     setIsAvulsa(false);
     setSelectedAvulsa(null);
+    setSelectedLocacao(null);
     setClienteNome('');
     setClienteTelefone('');
     setClienteDocumento('');
@@ -168,10 +263,24 @@ const totalAvulsas = avulsas.length;
 
   function handleLockerClick(locker) {
     if (locker.status === 'manutencao') return;
+
     resetModal();
     setIsAvulsa(false);
     setSelectedLocker(locker);
-    setModalType(locker.status === 'disponivel' ? 'nova' : 'finalizar');
+
+    if (locker.status === 'disponivel') {
+      setSelectedLocacao(null);
+      setModalType('nova');
+      return;
+    }
+
+    const locacaoAtiva = locacoesAtivasDetalhes.find(locacao =>
+      Array.isArray(locacao.lockers) &&
+      locacao.lockers.some(numero => String(numero) === String(locker.numero))
+    );
+
+    setSelectedLocacao(locacaoAtiva || null);
+    setModalType('finalizar');
   }
 
   // ✅ NOVO: clique em bagagem avulsa
@@ -188,15 +297,23 @@ const totalAvulsas = avulsas.length;
 }
 
   function handleAvulsaAtivaClick(avulsa) {
-  resetModal();
-  setIsAvulsa(true);
-  setSelectedAvulsa(avulsa);
-  setSelectedLocker(null);
-  setModalType('finalizar');
+    resetModal();
+    setIsAvulsa(true);
+    setSelectedAvulsa(avulsa);
+    setSelectedLocker(null);
+
+    const locacaoAtiva = locacoesAtivasDetalhes.find(
+      locacao => String(locacao.id) === String(avulsa.id)
+    );
+
+    setSelectedLocacao(locacaoAtiva || null);
+    setModalType('finalizar');
   }
 
   function closeModal() {
     setSelectedLocker(null);
+    setSelectedAvulsa(null);
+    setSelectedLocacao(null);
     setModalType(null);
     resetModal();
   }
@@ -290,73 +407,80 @@ const totalAvulsas = avulsas.length;
   }
 
   
-async function confirmarFinalizacao() {
-  if (submitting) return;
+  async function confirmarFinalizacao() {
+    if (submitting) return;
 
-  const mensagemConfirmacao = isAvulsa
-    ? `Confirmar finalização da bagagem avulsa de ${selectedAvulsa?.cliente_nome}?`
-    : `Confirmar finalização da locação do armário ${selectedLocker.numero}?`;
+    const mensagemConfirmacao = isAvulsa
+      ? `Confirmar finalização da bagagem avulsa de ${selectedAvulsa?.cliente_nome}?`
+      : `Confirmar finalização da locação do armário ${selectedLocker.numero}?`;
 
-  const confirmar = window.confirm(mensagemConfirmacao);
+    const confirmar = window.confirm(mensagemConfirmacao);
 
-  if (!confirmar) return;
+    if (!confirmar) return;
 
-  const valorExcedenteNormalizado =
-    valorExcedente.trim() === ''
-      ? null
-      : Number(String(valorExcedente).replace(',', '.'));
+    const valorExcedenteNormalizado =
+      valorExcedente.trim() === ''
+        ? null
+        : Number(String(valorExcedente).replace(',', '.'));
 
-  if (
-    valorExcedenteNormalizado !== null &&
-    (Number.isNaN(valorExcedenteNormalizado) || valorExcedenteNormalizado < 0)
-  ) {
-    showToast('Valor do excedente inválido.', 'error');
-    return;
-  }
-
-  if (valorPagoFinal.trim() === '') {
-    showToast('Informe o valor pago no fechamento (pode ser zero).', 'error');
-    return;
-  }
-
-  const valorPagoFinalNormalizado = Number(
-    String(valorPagoFinal).replace(',', '.')
-  );
-
-  if (Number.isNaN(valorPagoFinalNormalizado) || valorPagoFinalNormalizado < 0) {
-    showToast('Valor pago no fechamento inválido.', 'error');
-    return;
-  }
-
-  try {
-    setSubmitting(true);
-
-    const locacaoId = isAvulsa
-      ? selectedAvulsa.id
-      : await getLocacaoAtiva(selectedLocker.id);
-
-    await finalizarLocacao(locacaoId, {
-      valor_excedente_manual: valorExcedenteNormalizado,
-      valor_pago_final: valorPagoFinalNormalizado
-    });
-
-    await carregarLockers();
-
-    if (telefoneWhatsApp.trim()) {
-      window.open(
-        gerarLinkWhatsAppFinalizacao(locacaoId, telefoneWhatsApp),
-        '_blank'
-      );
+    if (
+      valorExcedenteNormalizado !== null &&
+      (Number.isNaN(valorExcedenteNormalizado) || valorExcedenteNormalizado < 0)
+    ) {
+      showToast('Valor do excedente inválido.', 'error');
+      return;
     }
 
-    showToast('Locação finalizada com sucesso.', 'success');
-    setTimeout(closeModal, 600);
+    if (valorPagoFinal.trim() === '') {
+      showToast('Informe o valor pago no fechamento (pode ser zero).', 'error');
+      return;
+    }
 
-  } catch (err) {
-    showToast(err.message || 'Erro ao finalizar locação.', 'error');
-    setSubmitting(false);
+    const valorPagoFinalNormalizado = Number(
+      String(valorPagoFinal).replace(',', '.')
+    );
+
+    if (Number.isNaN(valorPagoFinalNormalizado) || valorPagoFinalNormalizado < 0) {
+      showToast('Valor pago no fechamento inválido.', 'error');
+      return;
+    }
+
+    if (valorPagoFinalNormalizado > resumoFinalizacao.valorPendente) {
+      showToast('O valor pago no fechamento não pode ser maior que o valor pendente.', 'error');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const locacaoId = selectedLocacao?.id
+        ? selectedLocacao.id
+        : isAvulsa
+          ? selectedAvulsa.id
+          : await getLocacaoAtiva(selectedLocker.id);
+
+      await finalizarLocacao(locacaoId, {
+        valor_excedente_manual: valorExcedenteNormalizado,
+        valor_pago_final: valorPagoFinalNormalizado
+      });
+
+      await carregarLockers();
+
+      if (telefoneWhatsApp.trim()) {
+        window.open(
+          gerarLinkWhatsAppFinalizacao(locacaoId, telefoneWhatsApp),
+          '_blank'
+        );
+      }
+
+      showToast('Locação finalizada com sucesso.', 'success');
+      setTimeout(closeModal, 600);
+
+    } catch (err) {
+      showToast(err.message || 'Erro ao finalizar locação.', 'error');
+      setSubmitting(false);
+    }
   }
-}
 
   if (loading) {
     return (
@@ -543,30 +667,131 @@ async function confirmarFinalizacao() {
       onConfirm={confirmarFinalizacao}
       confirmDisabled={submitting}
     >
-      <div className="finalizacao-resumo">
-        <span>
-          Informe abaixo o valor pago no fechamento e, se necessário,
-          um ajuste manual do excedente.
-        </span>
+      <div className="finalizacao-grid">
+        <section className="finalizacao-card">
+          <h4>Identificação</h4>
+
+          <div className="finalizacao-info-lista">
+            <div>
+              <span>Cliente</span>
+              <strong>{selectedLocacao?.cliente_nome || selectedAvulsa?.cliente_nome || '-'}</strong>
+            </div>
+
+            <div>
+              <span>Recibo</span>
+              <strong>{selectedLocacao?.recibo_numero || '-'}</strong>
+            </div>
+
+            <div>
+              <span>Telefone</span>
+              <strong>{selectedLocacao?.cliente_telefone || '-'}</strong>
+            </div>
+
+            <div>
+              <span>Tipo</span>
+              <strong>{selectedLocacao?.tipo === 'avulsa' ? 'Bagagem avulsa' : 'Locker'}</strong>
+            </div>
+
+            <div>
+              <span>Armário(s)</span>
+              <strong>
+                {selectedLocacao?.tipo === 'avulsa'
+                  ? '-'
+                  : selectedLocacao?.lockers?.join(', ') || selectedLocker?.numero || '-'}
+              </strong>
+            </div>
+          </div>
+        </section>
+
+        <section className="finalizacao-card">
+          <h4>Resumo da locação</h4>
+
+          <div className="finalizacao-info-lista">
+            <div>
+              <span>Data</span>
+              <strong>{formatarData(selectedLocacao?.data)}</strong>
+            </div>
+
+            <div>
+              <span>Entrada</span>
+              <strong>{selectedLocacao?.hora_entrada || '-'}</strong>
+            </div>
+
+            <div>
+              <span>Pago até</span>
+              <strong>{selectedLocacao?.hora_pago_ate || '-'}</strong>
+            </div>
+
+            <div>
+              <span>Lacres</span>
+              <strong>{selectedLocacao?.lacres || '-'}</strong>
+            </div>
+
+            <div>
+              <span>Volumes extras</span>
+              <strong>{selectedLocacao?.total_volumes || 0}</strong>
+            </div>
+
+            <div>
+              <span>Aberta por</span>
+              <strong>
+                {selectedLocacao?.usuario_abertura_nome
+                  ? `${selectedLocacao.usuario_abertura_nome} — ${selectedLocacao.usuario_abertura_perfil}`
+                  : '-'}
+              </strong>
+            </div>
+
+            <div>
+              <span>Horas excedentes</span>
+              <strong>{resumoFinalizacao.horasExcedentes}</strong>
+            </div>
+
+            <div>
+              <span>Excedente sugerido</span>
+              <strong>{formatarMoeda(resumoFinalizacao.valorExcedenteSugerido)}</strong>
+            </div>
+          </div>
+        </section>
+
+        <section className="finalizacao-card finalizacao-card-financeiro">
+          <h4>Financeiro</h4>
+
+          <div className="finalizacao-metricas">
+            <div className="finalizacao-metrica">
+              <span>Valor total</span>
+              <strong>{formatarMoeda(resumoFinalizacao.valorTotal)}</strong>
+            </div>
+
+            <div className="finalizacao-metrica">
+              <span>Pago na abertura</span>
+              <strong>{formatarMoeda(resumoFinalizacao.valorPagoInicial)}</strong>
+            </div>
+
+            <div className="finalizacao-metrica destaque">
+              <span>Valor pendente</span>
+              <strong>{formatarMoeda(resumoFinalizacao.valorPendente)}</strong>
+            </div>
+          </div>
+
+          <input
+            placeholder="Valor do excedente (opcional)"
+            value={valorExcedente}
+            onChange={e => setValorExcedente(e.target.value)}
+          />
+
+          <input
+            placeholder="Valor pago no fechamento"
+            value={valorPagoFinal}
+            onChange={e => setValorPagoFinal(e.target.value)}
+          />
+
+          <input
+            placeholder="Telefone para WhatsApp"
+            value={telefoneWhatsApp}
+            onChange={e => setTelefoneWhatsApp(e.target.value)}
+          />
+        </section>
       </div>
-
-      <input
-        placeholder="Valor do excedente (opcional)"
-        value={valorExcedente}
-        onChange={e => setValorExcedente(e.target.value)}
-      />
-
-      <input
-        placeholder="Valor pago no fechamento"
-        value={valorPagoFinal}
-        onChange={e => setValorPagoFinal(e.target.value)}
-      />
-
-      <input
-        placeholder="Telefone para WhatsApp (com DDI e DDD)"
-        value={telefoneWhatsApp}
-        onChange={e => setTelefoneWhatsApp(e.target.value)}
-      />
 
       <button onClick={confirmarFinalizacao} disabled={submitting}>
         {submitting ? 'Finalizando...' : 'Finalizar locação'}
