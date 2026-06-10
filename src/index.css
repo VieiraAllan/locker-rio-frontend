@@ -4343,3 +4343,191 @@ body.dark .relatorios-filtros-personalizados input[type="date"]:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
+
+/* ======================================================
+   LOCAÇÕES ATIVAS — AÇÕES E CONFIG DO WHATSAPP
+====================================================== */
+.locacoes-header-acoes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.locacoes-whatsapp-config {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+  background: var(--card-bg);
+}
+
+.locacoes-whatsapp-config label {
+  font-size: 13px;
+  color: var(--text-soft, var(--text-main));
+  white-space: nowrap;
+}
+
+.locacoes-whatsapp-config select {
+  min-width: 130px;
+  padding: 8px 10px;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font: inherit;
+}
+
+.locacoes-whatsapp-config select:focus {
+  outline: none;
+  border-color: var(--accent, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* ======================================================
+   LOCAÇÃO CARD — ÁREA DE WHATSAPP
+====================================================== */
+.locacao-whatsapp-area {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--input-border);
+}
+
+.locacao-whatsapp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.locacao-whatsapp-header span {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.locacao-whatsapp-header small {
+  font-size: 12px;
+  color: var(--text-soft, var(--text-main));
+}
+
+.locacao-whatsapp-sem-telefone {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.locacao-whatsapp-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.locacao-whatsapp-btn {
+  padding: 9px 14px;
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.locacao-whatsapp-btn:hover:not(:disabled) {
+  border-color: var(--accent, #2563eb);
+  filter: brightness(0.98);
+}
+
+.locacao-whatsapp-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.locacao-whatsapp-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ======================================================
+   DARK MODE — WHATSAPP
+====================================================== */
+body.dark .locacoes-whatsapp-config {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+}
+
+body.dark .locacoes-whatsapp-config label {
+  color: var(--text-main);
+}
+
+body.dark .locacoes-whatsapp-config select {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+  color: #fff;
+}
+
+body.dark .locacoes-whatsapp-config select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+body.dark .locacao-whatsapp-area {
+  border-top-color: var(--input-border);
+}
+
+body.dark .locacao-whatsapp-header span {
+  color: #fff;
+}
+
+body.dark .locacao-whatsapp-header small {
+  color: var(--text-main);
+}
+
+body.dark .locacao-whatsapp-btn {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+  color: #fff;
+}
+
+body.dark .locacao-whatsapp-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: #fff;
+  filter: brightness(1.05);
+}
+
+/* ======================================================
+   RESPONSIVO
+====================================================== */
+@media (max-width: 768px) {
+  .locacoes-header-acoes {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .locacoes-whatsapp-config {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .locacoes-whatsapp-config select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .locacao-whatsapp-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .locacao-whatsapp-acoes {
+    flex-direction: column;
+  }
+
+  .locacao-whatsapp-btn {
+    width: 100%;
+  }
+}
