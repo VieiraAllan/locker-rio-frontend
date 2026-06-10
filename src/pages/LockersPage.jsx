@@ -39,6 +39,14 @@ function LockersPage({ showToast, usuarioAtual }) {
   const [telefoneWhatsApp, setTelefoneWhatsApp] = useState('');
   const [tipoMensagemWhatsApp, setTipoMensagemWhatsApp] = useState('finalizacao');
   const [idiomaMensagemWhatsApp, setIdiomaMensagemWhatsApp] = useState('pt');
+  const [whatsAppAberturaInfo, setWhatsAppAberturaInfo] = useState({
+    locacaoId: null,
+    clienteNome: '',
+    referencia: ''
+  });
+  const [telefoneWhatsAppAbertura, setTelefoneWhatsAppAbertura] = useState('');
+  const [idiomaMensagemAbertura, setIdiomaMensagemAbertura] = useState('');
+  const [abrindoWhatsAppAbertura, setAbrindoWhatsAppAbertura] = useState(false);
 
   const nomeRef = useRef(null);
   const telefoneRef = useRef(null);
@@ -266,6 +274,14 @@ function LockersPage({ showToast, usuarioAtual }) {
     setTelefoneWhatsApp('');
     setTipoMensagemWhatsApp('finalizacao');
     setIdiomaMensagemWhatsApp('pt');
+    setWhatsAppAberturaInfo({
+      locacaoId: null,
+      clienteNome: '',
+      referencia: ''
+    });
+    setTelefoneWhatsAppAbertura('');
+    setIdiomaMensagemAbertura('');
+    setAbrindoWhatsAppAbertura(false);
   }
 
   function handleLockerClick(locker) {
@@ -290,7 +306,6 @@ function LockersPage({ showToast, usuarioAtual }) {
     setModalType('finalizar');
   }
 
-  // ✅ NOVO: clique em bagagem avulsa
   function handleAvulsaClick() {
     if (!permitirBagagemAvulsa) {
       showToast('Bagagem avulsa está desabilitada nas configurações.', 'error');
@@ -381,7 +396,6 @@ function LockersPage({ showToast, usuarioAtual }) {
       return;
     }
 
-    // ✅ avulsa exige bagagem
     if (isAvulsa && bagagensExternas.length === 0) {
       showToast('Bagagem avulsa exige ao menos uma bagagem.', 'error');
       return;
@@ -392,7 +406,13 @@ function LockersPage({ showToast, usuarioAtual }) {
     try {
       setSubmitting(true);
 
-      await criarLocacao({
+      const referenciaAbertura = isAvulsa
+        ? 'Bagagem avulsa'
+        : `Armário ${selectedLocker?.numero}`;
+      const telefoneClienteAtual = clienteTelefone.trim();
+      const nomeClienteAtual = clienteNome.trim();
+
+      const resultadoCriacao = await criarLocacao({
         locker_ids: lockerIdsPayload,
         in_rio_tour: permitirInRioTour ? inRioTour : false,
         bagagens_externas: bagagensExternas,
@@ -408,11 +428,103 @@ function LockersPage({ showToast, usuarioAtual }) {
 
       showToast('Locação criada com sucesso.', 'success');
       await carregarLockers();
+
+      const locacaoCriadaId = resultadoCriacao?.locacao?.id;
+
+      if (locacaoCriadaId && telefoneClienteAtual) {
+        setSelectedLocker(null);
+        setSelectedAvulsa(null);
+        setSelectedLocacao(null);
+        setIsAvulsa(false);
+        setClienteNome('');
+        setClienteTelefone('');
+        setClienteDocumento('');
+        setValorPago('');
+        setLacres('');
+        setInRioTour(false);
+        setDescricaoBagagem('');
+        setQuantidadeBagagem(1);
+        setBagagensExternas([]);
+        setValorExcedente('');
+        setValorPagoFinal('');
+        setTelefoneWhatsApp('');
+        setTipoMensagemWhatsApp('finalizacao');
+        setIdiomaMensagemWhatsApp('pt');
+        setSubmitting(false);
+
+        setWhatsAppAberturaInfo({
+          locacaoId: locacaoCriadaId,
+          clienteNome: nomeClienteAtual,
+          referencia: referenciaAbertura
+        });
+        setTelefoneWhatsAppAbertura(telefoneClienteAtual);
+        setIdiomaMensagemAbertura('');
+        setModalType('whatsapp_abertura');
+        return;
+      }
+
+      if (!telefoneClienteAtual) {
+        showToast(
+          'Locação criada. Como não há telefone cadastrado, a mensagem de abertura poderá ser enviada depois em Locações Ativas.',
+          'success'
+        );
+      }
+
       setTimeout(closeModal, 600);
     } catch (err) {
       showToast(err.message || 'Erro ao criar locação.', 'error');
       setSubmitting(false);
     }
+  }
+
+  async function handleAbrirWhatsAppAbertura() {
+    if (abrindoWhatsAppAbertura) return;
+
+    if (!telefoneWhatsAppAbertura.trim()) {
+      showToast('Informe o telefone para o WhatsApp.', 'error');
+      return;
+    }
+
+    if (!idiomaMensagemAbertura) {
+      showToast('Selecione o idioma da mensagem.', 'error');
+      return;
+    }
+
+    if (!whatsAppAberturaInfo.locacaoId) {
+      showToast('Locação recém-criada não identificada.', 'error');
+      return;
+    }
+
+    try {
+      setAbrindoWhatsAppAbertura(true);
+
+      const resultadoMensagem = await gerarMensagemWhatsApp(
+        whatsAppAberturaInfo.locacaoId,
+        {
+          tipo: 'abertura',
+          idioma: idiomaMensagemAbertura,
+          telefone: telefoneWhatsAppAbertura.trim()
+        }
+      );
+
+      if (!resultadoMensagem?.mensagem) {
+        throw new Error('Mensagem de abertura não retornada.');
+      }
+
+      abrirWhatsApp({
+        telefone: telefoneWhatsAppAbertura.trim(),
+        mensagem: resultadoMensagem.mensagem
+      });
+
+      closeModal();
+    } catch (err) {
+      showToast(err.message || 'Erro ao gerar mensagem de abertura.', 'error');
+      setAbrindoWhatsAppAbertura(false);
+    }
+  }
+
+  function pularWhatsAppAbertura() {
+    closeModal();
   }
 
   async function confirmarFinalizacao() {
@@ -541,14 +653,12 @@ function LockersPage({ showToast, usuarioAtual }) {
             />
           ))}
 
-          {/* ✅ CARD BAGAGEM AVULSA */}
           {permitirBagagemAvulsa && (
             <div className="avulsa-add-card" onClick={handleAvulsaClick}>
               + 📦 Bagagem avulsa
             </div>
           )}
 
-          {/* ✅ LISTAGEM DE BAGAGENS AVULSAS ATIVAS */}
           {avulsas.map(avulsa => (
             <div
               key={avulsa.id}
@@ -561,7 +671,6 @@ function LockersPage({ showToast, usuarioAtual }) {
         </div>
       </div>
 
-      {/* NOVA LOCAÇÃO */}
       <Modal
         key={isAvulsa ? 'modal-nova-avulsa' : 'modal-nova-locker'}
         isOpen={modalType === 'nova'}
@@ -683,7 +792,71 @@ function LockersPage({ showToast, usuarioAtual }) {
         </button>
       </Modal>
 
-      {/* FINALIZAR LOCAÇÃO */}
+      <Modal
+        isOpen={modalType === 'whatsapp_abertura'}
+        title="Mensagem de abertura"
+        onClose={closeModal}
+        confirmDisabled={abrindoWhatsAppAbertura}
+      >
+        <div className="whatsapp-abertura-modal">
+          <div className="whatsapp-abertura-resumo">
+            <div>
+              <span>Cliente</span>
+              <strong>{whatsAppAberturaInfo.clienteNome || '-'}</strong>
+            </div>
+            <div>
+              <span>Referência</span>
+              <strong>{whatsAppAberturaInfo.referencia || '-'}</strong>
+            </div>
+          </div>
+
+          <p className="whatsapp-abertura-texto">
+            A locação foi criada com sucesso. Se desejar, envie agora a mensagem de abertura ao cliente.
+          </p>
+
+          <div className="whatsapp-config-grid whatsapp-config-grid-abertura">
+            <div className="whatsapp-config-item">
+              <label>Idioma</label>
+              <select
+                value={idiomaMensagemAbertura}
+                onChange={e => setIdiomaMensagemAbertura(e.target.value)}
+              >
+                <option value="">Selecione o idioma</option>
+                <option value="pt">Português</option>
+                <option value="en">Inglês</option>
+                <option value="es">Espanhol</option>
+              </select>
+            </div>
+          </div>
+
+          <input
+            placeholder="Telefone para WhatsApp"
+            value={telefoneWhatsAppAbertura}
+            onChange={e => setTelefoneWhatsAppAbertura(e.target.value)}
+          />
+
+          <div className="whatsapp-abertura-acoes">
+            <button
+              type="button"
+              className="whatsapp-abertura-btn secundario"
+              onClick={pularWhatsAppAbertura}
+              disabled={abrindoWhatsAppAbertura}
+            >
+              Pular por agora
+            </button>
+
+            <button
+              type="button"
+              className="whatsapp-abertura-btn principal"
+              onClick={handleAbrirWhatsAppAbertura}
+              disabled={abrindoWhatsAppAbertura}
+            >
+              {abrindoWhatsAppAbertura ? 'Abrindo WhatsApp...' : 'Abrir WhatsApp'}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
       <Modal
         isOpen={modalType === 'finalizar'}
         title={

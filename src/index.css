@@ -4531,3 +4531,231 @@ body.dark .locacao-whatsapp-btn:hover:not(:disabled) {
     width: 100%;
   }
 }
+
+/* ======================================================
+   WHATSAPP — MODAL DE ABERTURA DA LOCAÇÃO
+====================================================== */
+.whatsapp-abertura-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.whatsapp-abertura-resumo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+  background: var(--card-bg);
+}
+
+/* Corrige o "texto colado" entre legenda e valor */
+.whatsapp-abertura-resumo > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.whatsapp-abertura-resumo > div span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-soft, var(--text-main));
+}
+
+.whatsapp-abertura-resumo > div strong {
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+.whatsapp-abertura-texto {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-main);
+}
+
+.whatsapp-config-grid-abertura {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.whatsapp-config-grid-abertura .whatsapp-config-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.whatsapp-config-grid-abertura .whatsapp-config-item label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.whatsapp-config-grid-abertura .whatsapp-config-item select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font: inherit;
+}
+
+.whatsapp-config-grid-abertura .whatsapp-config-item select:focus {
+  outline: none;
+  border-color: var(--accent, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.whatsapp-abertura-modal input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.whatsapp-abertura-modal input:focus {
+  outline: none;
+  border-color: var(--accent, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.whatsapp-abertura-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.whatsapp-abertura-btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--input-border);
+  font: inherit;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.whatsapp-abertura-btn:hover:not(:disabled) {
+  filter: brightness(0.98);
+}
+
+.whatsapp-abertura-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.whatsapp-abertura-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.whatsapp-abertura-btn.secundario {
+  background: var(--card-bg);
+  color: var(--text-main);
+  border: 1px solid var(--input-border);
+}
+
+.whatsapp-abertura-btn.secundario:hover:not(:disabled) {
+  border-color: var(--accent, #2563eb);
+}
+
+.whatsapp-abertura-btn.principal {
+  background: #198754;
+  color: #fff;
+  border: 1px solid #198754;
+}
+
+.whatsapp-abertura-btn.principal:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+/* ======================================================
+   DARK MODE — MODAL DE ABERTURA
+====================================================== */
+body.dark .whatsapp-abertura-resumo {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+}
+
+body.dark .whatsapp-abertura-resumo > div span {
+  color: var(--text-main);
+}
+
+body.dark .whatsapp-abertura-resumo > div strong {
+  color: #fff;
+}
+
+body.dark .whatsapp-abertura-texto {
+  color: var(--text-main);
+}
+
+body.dark .whatsapp-config-grid-abertura .whatsapp-config-item label {
+  color: #fff;
+}
+
+body.dark .whatsapp-config-grid-abertura .whatsapp-config-item select {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+  color: #fff;
+}
+
+body.dark .whatsapp-config-grid-abertura .whatsapp-config-item select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+body.dark .whatsapp-abertura-modal input {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+  color: #fff;
+}
+
+body.dark .whatsapp-abertura-modal input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+body.dark .whatsapp-abertura-btn.secundario {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+  color: #fff;
+}
+
+body.dark .whatsapp-abertura-btn.secundario:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: #fff;
+  filter: brightness(1.05);
+}
+
+body.dark .whatsapp-abertura-btn.principal {
+  background: #198754;
+  border-color: #198754;
+  color: #fff;
+}
+
+/* ======================================================
+   RESPONSIVO
+====================================================== */
+@media (max-width: 768px) {
+  .whatsapp-abertura-acoes {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .whatsapp-abertura-btn {
+    width: 100%;
+  }
+
+  .whatsapp-abertura-resumo > div {
+    align-items: flex-start;
+  }
+}
