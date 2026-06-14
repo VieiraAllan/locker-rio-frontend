@@ -16,6 +16,8 @@ import {
   podeAcessarPagina
 } from './config/permissoes';
 
+import logoCliente from './assets/logo-cliente.svg';
+
 function App() {
   const { toast, showToast, clearToast } = useToast();
 
@@ -151,7 +153,7 @@ function App() {
   function handleLogout() {
     localStorage.removeItem('lockerRioUsuario');
     localStorage.removeItem('lockerRioToken');
-    
+
     setUsuarioLogado(null);
     setPaginaAtual(paginas.PAINEL);
     setMenuOpen(false);
@@ -211,7 +213,11 @@ function App() {
 
       <aside className={`app-sidebar ${menuOpen ? 'open' : ''}`}>
         <div className="sidebar-brand">
-          <span className="sidebar-logo">▣</span>
+          <img
+            src={logoCliente}
+            alt="Locker Rio"
+            className="sidebar-logo-img"
+          />
           <span>Locker Rio</span>
         </div>
 

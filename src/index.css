@@ -5243,3 +5243,33 @@ body.dark .confirmacao-finalizacao-btn.principal:hover:not(:disabled) {
     align-items: flex-start;
   }
 }
+
+/* ======================================================
+   APP — LOGO DO CLIENTE NA SIDEBAR
+====================================================== */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-logo-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: block;
+}
+
+/* Ajuste opcional do texto da marca */
+.sidebar-brand span:last-child {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+/* ======================================================
+   DARK MODE — LOGO BRANCA
+====================================================== */
+body.dark .sidebar-logo-img {
+  filter: brightness(0) invert(1);
+}
