@@ -46,6 +46,7 @@ function LockersPage({ showToast, usuarioAtual }) {
   const [telefoneWhatsAppAbertura, setTelefoneWhatsAppAbertura] = useState('');
   const [idiomaMensagemAbertura, setIdiomaMensagemAbertura] = useState('');
   const [abrindoWhatsAppAbertura, setAbrindoWhatsAppAbertura] = useState(false);
+  const [ajusteManualExcedenteAberto, setAjusteManualExcedenteAberto] = useState(false);
 
   const nomeRef = useRef(null);
   const telefoneRef = useRef(null);
@@ -56,6 +57,16 @@ function LockersPage({ showToast, usuarioAtual }) {
     (total, b) => total + b.quantidade,
     0
   );
+
+  const perfilAtualNormalizado = String(usuarioAtual?.perfil || '')
+    .trim()
+    .toLowerCase();
+
+  const podeAjustarManualFinalizacao = [
+    'admin',
+    'administrador',
+    'gerente'
+  ].some(perfil => perfilAtualNormalizado.includes(perfil));
 
   function formatarMoeda(valor) {
     return Number(valor || 0).toLocaleString('pt-BR', {
@@ -72,6 +83,29 @@ function LockersPage({ showToast, usuarioAtual }) {
     }
     const [ano, mes, dia] = partes;
     return `${dia}/${mes}/${ano}`;
+  }
+
+  function normalizarValorMonetario(valor) {
+    if (valor === null || valor === undefined) {
+      return 0;
+    }
+
+    if (typeof valor === 'number') {
+      return Number.isNaN(valor) ? 0 : valor;
+    }
+
+    const texto = String(valor).trim();
+
+    if (!texto) {
+      return 0;
+    }
+
+    const numero = Number(texto.replace(',', '.'));
+    return Number.isNaN(numero) ? NaN : numero;
+  }
+
+  function formatarValorParaInput(valor) {
+    return Number(valor || 0).toFixed(2).replace('.', ',');
   }
 
   function abrirWhatsApp({ telefone, mensagem }) {
@@ -181,6 +215,18 @@ function LockersPage({ showToast, usuarioAtual }) {
 
   const resumoFinalizacao = calcularResumoFinalizacao(selectedLocacao);
 
+  const valorExcedenteManualNormalizado = normalizarValorMonetario(valorExcedente);
+  const cobrancaAdicionalEfetiva =
+    ajusteManualExcedenteAberto && podeAjustarManualFinalizacao
+      ? Number.isNaN(valorExcedenteManualNormalizado)
+        ? NaN
+        : valorExcedenteManualNormalizado
+      : resumoFinalizacao.valorExcedenteSugerido;
+
+  const totalCobrarAgora = Number.isNaN(cobrancaAdicionalEfetiva)
+    ? NaN
+    : resumoFinalizacao.valorPendente + cobrancaAdicionalEfetiva;
+
   const permitirBagagemAvulsa =
     configuracoes?.operacao?.permitirBagagemAvulsa !== false;
   const permitirInRioTour =
@@ -251,6 +297,11 @@ function LockersPage({ showToast, usuarioAtual }) {
         '';
 
       setTelefoneWhatsApp(telefonePadrao);
+      setAjusteManualExcedenteAberto(false);
+      setValorExcedente('');
+
+      const totalInicial = resumoFinalizacao.valorPendente + resumoFinalizacao.valorExcedenteSugerido;
+      setValorPagoFinal(formatarValorParaInput(totalInicial));
     }
   }, [modalType, selectedLocacao, selectedAvulsa]);
 
@@ -281,6 +332,7 @@ function LockersPage({ showToast, usuarioAtual }) {
     setTelefoneWhatsAppAbertura('');
     setIdiomaMensagemAbertura('');
     setAbrindoWhatsAppAbertura(false);
+    setAjusteManualExcedenteAberto(false);
   }
 
   function handleLockerClick(locker) {
@@ -529,36 +581,38 @@ function LockersPage({ showToast, usuarioAtual }) {
   function prepararConfirmacaoFinalizacao() {
     if (submitting) return;
 
-    const valorExcedenteNormalizado =
-      valorExcedente.trim() === ''
-        ? null
-        : Number(String(valorExcedente).replace(',', '.'));
+    if (ajusteManualExcedenteAberto && podeAjustarManualFinalizacao) {
+      if (valorExcedente.trim() === '') {
+        showToast('Informe a cobrança adicional manual.', 'error');
+        return;
+      }
 
-    if (
-      valorExcedenteNormalizado !== null &&
-      (Number.isNaN(valorExcedenteNormalizado) || valorExcedenteNormalizado < 0)
-    ) {
-      showToast('Valor do excedente inválido.', 'error');
+      if (Number.isNaN(valorExcedenteManualNormalizado) || valorExcedenteManualNormalizado < 0) {
+        showToast('Cobrança adicional manual inválida.', 'error');
+        return;
+      }
+    }
+
+    if (Number.isNaN(totalCobrarAgora) || totalCobrarAgora < 0) {
+      showToast('Total a cobrar agora inválido.', 'error');
       return;
     }
 
     if (valorPagoFinal.trim() === '') {
-      showToast('Informe o valor pago no fechamento (pode ser zero).', 'error');
+      showToast('Informe o valor recebido agora.', 'error');
       return;
     }
 
-    const valorPagoFinalNormalizado = Number(
-      String(valorPagoFinal).replace(',', '.')
-    );
+    const valorPagoFinalNormalizado = normalizarValorMonetario(valorPagoFinal);
 
     if (Number.isNaN(valorPagoFinalNormalizado) || valorPagoFinalNormalizado < 0) {
-      showToast('Valor pago no fechamento inválido.', 'error');
+      showToast('Valor recebido agora inválido.', 'error');
       return;
     }
 
-    if (valorPagoFinalNormalizado > resumoFinalizacao.valorPendente) {
+    if (Math.abs(valorPagoFinalNormalizado - totalCobrarAgora) > 0.009) {
       showToast(
-        'O valor pago no fechamento não pode ser maior que o valor pendente.',
+        'A locação só pode ser finalizada com o valor recebido agora igual ao total a cobrar agora.',
         'error'
       );
       return;
@@ -574,39 +628,43 @@ function LockersPage({ showToast, usuarioAtual }) {
   async function confirmarFinalizacaoDefinitiva() {
     if (submitting) return;
 
-    const valorExcedenteNormalizado =
-      valorExcedente.trim() === ''
-        ? null
-        : Number(String(valorExcedente).replace(',', '.'));
+    if (ajusteManualExcedenteAberto && podeAjustarManualFinalizacao) {
+      if (valorExcedente.trim() === '') {
+        showToast('Informe a cobrança adicional manual.', 'error');
+        setModalType('finalizar');
+        return;
+      }
 
-    if (
-      valorExcedenteNormalizado !== null &&
-      (Number.isNaN(valorExcedenteNormalizado) || valorExcedenteNormalizado < 0)
-    ) {
-      showToast('Valor do excedente inválido.', 'error');
+      if (Number.isNaN(valorExcedenteManualNormalizado) || valorExcedenteManualNormalizado < 0) {
+        showToast('Cobrança adicional manual inválida.', 'error');
+        setModalType('finalizar');
+        return;
+      }
+    }
+
+    if (Number.isNaN(totalCobrarAgora) || totalCobrarAgora < 0) {
+      showToast('Total a cobrar agora inválido.', 'error');
       setModalType('finalizar');
       return;
     }
 
     if (valorPagoFinal.trim() === '') {
-      showToast('Informe o valor pago no fechamento (pode ser zero).', 'error');
+      showToast('Informe o valor recebido agora.', 'error');
       setModalType('finalizar');
       return;
     }
 
-    const valorPagoFinalNormalizado = Number(
-      String(valorPagoFinal).replace(',', '.')
-    );
+    const valorPagoFinalNormalizado = normalizarValorMonetario(valorPagoFinal);
 
     if (Number.isNaN(valorPagoFinalNormalizado) || valorPagoFinalNormalizado < 0) {
-      showToast('Valor pago no fechamento inválido.', 'error');
+      showToast('Valor recebido agora inválido.', 'error');
       setModalType('finalizar');
       return;
     }
 
-    if (valorPagoFinalNormalizado > resumoFinalizacao.valorPendente) {
+    if (Math.abs(valorPagoFinalNormalizado - totalCobrarAgora) > 0.009) {
       showToast(
-        'O valor pago no fechamento não pode ser maior que o valor pendente.',
+        'A locação só pode ser finalizada com o valor recebido agora igual ao total a cobrar agora.',
         'error'
       );
       setModalType('finalizar');
@@ -623,7 +681,10 @@ function LockersPage({ showToast, usuarioAtual }) {
           : await getLocacaoAtiva(selectedLocker.id);
 
       await finalizarLocacao(locacaoId, {
-        valor_excedente_manual: valorExcedenteNormalizado,
+        valor_excedente_manual:
+          ajusteManualExcedenteAberto && podeAjustarManualFinalizacao
+            ? valorExcedenteManualNormalizado
+            : null,
         valor_pago_final: valorPagoFinalNormalizado
       });
 
@@ -977,7 +1038,7 @@ function LockersPage({ showToast, usuarioAtual }) {
                 <strong>{resumoFinalizacao.horasExcedentes}</strong>
               </div>
               <div>
-                <span>Excedente sugerido</span>
+                <span>Cobrança de excendete calculada</span>
                 <strong>{formatarMoeda(resumoFinalizacao.valorExcedenteSugerido)}</strong>
               </div>
             </div>
@@ -987,30 +1048,72 @@ function LockersPage({ showToast, usuarioAtual }) {
             <h4>Financeiro</h4>
             <div className="finalizacao-metricas">
               <div className="finalizacao-metrica">
-                <span>Valor total</span>
+                <span>Valor contratado</span>
                 <strong>{formatarMoeda(resumoFinalizacao.valorTotal)}</strong>
               </div>
               <div className="finalizacao-metrica">
                 <span>Pago na abertura</span>
                 <strong>{formatarMoeda(resumoFinalizacao.valorPagoInicial)}</strong>
               </div>
+              <div className="finalizacao-metrica">
+                <span>Cobrança de excedente</span>
+                <strong>
+                  {ajusteManualExcedenteAberto && podeAjustarManualFinalizacao
+                    ? formatarMoeda(cobrancaAdicionalEfetiva || 0)
+                    : formatarMoeda(resumoFinalizacao.valorExcedenteSugerido)}
+                </strong>
+              </div>
               <div className="finalizacao-metrica destaque">
-                <span>Valor pendente</span>
-                <strong>{formatarMoeda(resumoFinalizacao.valorPendente)}</strong>
+                <span>Total a cobrar agora</span>
+                <strong>{formatarMoeda(totalCobrarAgora || 0)}</strong>
               </div>
             </div>
 
-            <input
-              placeholder="Valor do excedente (opcional)"
-              value={valorExcedente}
-              onChange={e => setValorExcedente(e.target.value)}
-            />
+            <div className="finalizacao-campo-principal">
+              <label>Valor recebido agora</label>
+              <input
+                placeholder="Valor recebido agora"
+                value={valorPagoFinal}
+                onChange={e => setValorPagoFinal(e.target.value)}
+              />
+            </div>
 
-            <input
-              placeholder="Valor pago no fechamento*"
-              value={valorPagoFinal}
-              onChange={e => setValorPagoFinal(e.target.value)}
-            />
+            {podeAjustarManualFinalizacao && (
+              <div className="finalizacao-ajuste-manual-area">
+                <button
+                  type="button"
+                  className="finalizacao-ajuste-toggle"
+                  onClick={() => {
+                    const proximoAberto = !ajusteManualExcedenteAberto;
+                    setAjusteManualExcedenteAberto(proximoAberto);
+
+                    if (!proximoAberto) {
+                      setValorExcedente('');
+                      setValorPagoFinal(
+                        formatarValorParaInput(
+                          resumoFinalizacao.valorPendente + resumoFinalizacao.valorExcedenteSugerido
+                        )
+                      );
+                    }
+                  }}
+                >
+                  {ajusteManualExcedenteAberto
+                    ? 'Cancelar ajuste manual'
+                    : 'Ajustar cobrança manualmente'}
+                </button>
+
+                {ajusteManualExcedenteAberto && (
+                  <div className="finalizacao-campo-principal finalizacao-campo-secundario">
+                    <label>Cobrança adicional manual</label>
+                    <input
+                      placeholder="Cobrança adicional manual"
+                      value={valorExcedente}
+                      onChange={e => setValorExcedente(e.target.value)}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="whatsapp-config-grid">
               <div className="whatsapp-config-item">
@@ -1075,16 +1178,16 @@ function LockersPage({ showToast, usuarioAtual }) {
               </strong>
             </div>
             <div>
-              <span>Valor pago no fechamento</span>
-              <strong>{formatarMoeda(valorPagoFinal || 0)}</strong>
+              <span>Total a cobrar agora</span>
+              <strong>{formatarMoeda(totalCobrarAgora || 0)}</strong>
             </div>
             <div>
-              <span>Excedente informado</span>
-              <strong>
-                {valorExcedente.trim() === ''
-                  ? 'Não informado'
-                  : formatarMoeda(Number(String(valorExcedente).replace(',', '.')) || 0)}
-              </strong>
+              <span>Valor recebido agora</span>
+              <strong>{formatarMoeda(normalizarValorMonetario(valorPagoFinal) || 0)}</strong>
+            </div>
+            <div>
+              <span>Cobrança adicional</span>
+              <strong>{formatarMoeda(cobrancaAdicionalEfetiva || 0)}</strong>
             </div>
             <div>
               <span>Mensagem WhatsApp</span>
