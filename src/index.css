@@ -4759,3 +4759,280 @@ body.dark .whatsapp-abertura-btn.principal {
     align-items: flex-start;
   }
 }
+
+/* ======================================================
+   LOCAÇÕES ATIVAS — EDITAR CLIENTE
+====================================================== */
+.locacao-editar-btn {
+  padding: 9px 14px;
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.locacao-editar-btn:hover:not(:disabled) {
+  border-color: var(--accent, #2563eb);
+  filter: brightness(0.98);
+}
+
+.locacao-editar-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.locacao-editar-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.locacao-edicao-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.locacao-edicao-resumo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+  background: var(--card-bg);
+}
+
+.locacao-edicao-resumo > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.locacao-edicao-resumo > div span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-soft, var(--text-main));
+}
+
+.locacao-edicao-resumo > div strong {
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+.locacao-edicao-modal input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.locacao-edicao-modal input:focus {
+  outline: none;
+  border-color: var(--accent, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* ======================================================
+   DARK MODE — EDITAR CLIENTE
+====================================================== */
+body.dark .locacao-editar-btn {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+  color: #fff;
+}
+
+body.dark .locacao-editar-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: #fff;
+  filter: brightness(1.05);
+}
+
+body.dark .locacao-edicao-resumo {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+}
+
+body.dark .locacao-edicao-resumo > div span {
+  color: var(--text-main);
+}
+
+body.dark .locacao-edicao-resumo > div strong {
+  color: #fff;
+}
+
+body.dark .locacao-edicao-modal input {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+  color: #fff;
+}
+
+body.dark .locacao-edicao-modal input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* ======================================================
+   RESPONSIVO
+====================================================== */
+@media (max-width: 768px) {
+  .locacao-editar-btn {
+    width: 100%;
+  }
+
+  .locacao-edicao-resumo > div {
+    align-items: flex-start;
+  }
+}
+
+/* ======================================================
+   LOCAÇÕES ATIVAS — CAMPOS DO MODAL DE EDIÇÃO
+====================================================== */
+.locacao-edicao-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.locacao-edicao-campo label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-soft, var(--text-main));
+}
+
+.locacao-edicao-campo input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.locacao-edicao-campo input:focus {
+  outline: none;
+  border-color: var(--accent, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* ======================================================
+   DARK MODE — CAMPOS DO MODAL DE EDIÇÃO
+====================================================== */
+body.dark .locacao-edicao-campo label {
+  color: #fff;
+}
+
+body.dark .locacao-edicao-campo input {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+  color: #fff;
+}
+
+body.dark .locacao-edicao-campo input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* ======================================================
+   LOCAÇÕES ATIVAS — AÇÕES DO MODAL DE EDIÇÃO
+====================================================== */
+.locacao-edicao-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.locacao-edicao-btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--input-border);
+  font: inherit;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.locacao-edicao-btn:hover:not(:disabled) {
+  filter: brightness(0.98);
+}
+
+.locacao-edicao-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.locacao-edicao-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.locacao-edicao-btn.secundario {
+  background: var(--card-bg);
+  color: var(--text-main);
+  border: 1px solid var(--input-border);
+}
+
+.locacao-edicao-btn.secundario:hover:not(:disabled) {
+  border-color: var(--accent, #2563eb);
+}
+
+.locacao-edicao-btn.principal {
+  background: var(--card-bg);
+  color: var(--text-main);
+  border: 1px solid var(--input-border);
+}
+
+.locacao-edicao-btn.principal:hover:not(:disabled) {
+  border-color: var(--accent, #2563eb);
+  filter: brightness(0.98);
+}
+
+/* ======================================================
+   DARK MODE — AÇÕES DO MODAL DE EDIÇÃO
+====================================================== */
+body.dark .locacao-edicao-btn.secundario {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+  color: #fff;
+}
+
+body.dark .locacao-edicao-btn.secundario:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: #fff;
+  filter: brightness(1.05);
+}
+
+body.dark .locacao-edicao-btn.principal {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+  color: #fff;
+}
+
+body.dark .locacao-edicao-btn.principal:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: #fff;
+  filter: brightness(1.05);
+}
+
+/* ======================================================
+   RESPONSIVO
+====================================================== */
+@media (max-width: 768px) {
+  .locacao-edicao-acoes {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .locacao-edicao-btn {
+    width: 100%;
+  }
+}

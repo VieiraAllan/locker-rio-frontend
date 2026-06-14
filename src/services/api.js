@@ -58,6 +58,32 @@ export async function getLocacaoAtiva(lockerId) {
 }
 
 /* =========================
+   EDITAR DADOS DO CLIENTE
+========================= */
+export async function atualizarDadosClienteLocacao(locacaoId, payload) {
+  const response = await fetch(`${API_URL}/locacoes/${locacaoId}/cliente`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders()
+    },
+    body: JSON.stringify({
+      cliente_nome: payload.cliente_nome,
+      cliente_telefone: payload.cliente_telefone,
+      cliente_documento: payload.cliente_documento
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Erro ao atualizar dados do cliente');
+  }
+
+  return data.data;
+}
+
+/* =========================
    FINALIZAR LOCAÇÃO
 ========================= */
 export async function finalizarLocacao(locacaoId, payload = {}) {
@@ -143,7 +169,7 @@ export function gerarLinkWhatsAppFinalizacao(
 }
 
 /* =========================
-   BAGAGENS AVULSAS ATIVAS ✅ (ETAPA 2)
+   BAGAGENS AVULSAS ATIVAS
 ========================= */
 export async function getAvulsasAtivas() {
   const response = await fetch(`${API_URL}/locacoes/avulsas-ativas`);

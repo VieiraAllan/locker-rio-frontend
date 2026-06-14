@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import Modal from '../components/Modal';
 import {
   getLocacoesAtivas,
   abrirReciboPdf,
-  gerarMensagemWhatsApp
+  gerarMensagemWhatsApp,
+  atualizarDadosClienteLocacao
 } from '../services/api';
 
 function LocacoesAtivasPage({ showToast }) {
@@ -11,6 +13,12 @@ function LocacoesAtivasPage({ showToast }) {
   const [gerandoReciboId, setGerandoReciboId] = useState(null);
   const [gerandoMensagemChave, setGerandoMensagemChave] = useState(null);
   const [idiomaWhatsApp, setIdiomaWhatsApp] = useState('pt');
+  const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
+  const [locacaoEmEdicao, setLocacaoEmEdicao] = useState(null);
+  const [editClienteNome, setEditClienteNome] = useState('');
+  const [editClienteTelefone, setEditClienteTelefone] = useState('');
+  const [editClienteDocumento, setEditClienteDocumento] = useState('');
+  const [salvandoEdicao, setSalvandoEdicao] = useState(false);
 
   async function carregarLocacoesAtivas() {
     try {
@@ -88,6 +96,56 @@ function LocacoesAtivasPage({ showToast }) {
       showToast(err.message || 'Erro ao gerar mensagem do WhatsApp.', 'error');
     } finally {
       setGerandoMensagemChave(null);
+    }
+  }
+
+  function abrirModalEdicao(locacao) {
+    setLocacaoEmEdicao(locacao);
+    setEditClienteNome(locacao?.cliente_nome || '');
+    setEditClienteTelefone(locacao?.cliente_telefone || '');
+    setEditClienteDocumento(locacao?.cliente_documento || '');
+    setModalEdicaoAberto(true);
+  }
+
+  function fecharModalEdicao() {
+    setModalEdicaoAberto(false);
+    setLocacaoEmEdicao(null);
+    setEditClienteNome('');
+    setEditClienteTelefone('');
+    setEditClienteDocumento('');
+    setSalvandoEdicao(false);
+  }
+
+  async function handleSalvarEdicaoCliente() {
+    if (!locacaoEmEdicao?.id || salvandoEdicao) {
+      return;
+    }
+
+    if (!editClienteNome.trim()) {
+      showToast('Informe o nome do cliente.', 'error');
+      return;
+    }
+
+    if (!editClienteDocumento.trim()) {
+      showToast('Informe o documento / observação.', 'error');
+      return;
+    }
+
+    try {
+      setSalvandoEdicao(true);
+
+      await atualizarDadosClienteLocacao(locacaoEmEdicao.id, {
+        cliente_nome: editClienteNome.trim(),
+        cliente_telefone: editClienteTelefone.trim(),
+        cliente_documento: editClienteDocumento.trim()
+      });
+
+      showToast('Dados do cliente atualizados com sucesso.', 'success');
+      await carregarLocacoesAtivas();
+      fecharModalEdicao();
+    } catch (err) {
+      showToast(err.message || 'Erro ao atualizar dados do cliente.', 'error');
+      setSalvandoEdicao(false);
     }
   }
 
@@ -169,6 +227,14 @@ function LocacoesAtivasPage({ showToast }) {
                   </div>
 
                   <div className="locacao-topo-acoes">
+                    <button
+                      type="button"
+                      className="locacao-editar-btn"
+                      onClick={() => abrirModalEdicao(locacao)}
+                    >
+                      Editar cliente
+                    </button>
+
                     <button
                       type="button"
                       className="locacao-recibo-btn"
@@ -297,6 +363,79 @@ function LocacoesAtivasPage({ showToast }) {
           })}
         </div>
       )}
+
+      <Modal
+        isOpen={modalEdicaoAberto}
+        title="Editar dados do cliente"
+        onClose={fecharModalEdicao}
+      >
+        <div className="locacao-edicao-modal">
+          <div className="locacao-edicao-resumo">
+            <div>
+              <span>Locação</span>
+              <strong>
+                {locacaoEmEdicao?.tipo === 'avulsa'
+                  ? 'Bagagem avulsa'
+                  : `Armário ${locacaoEmEdicao?.lockers?.join(', ') || '-'}`}
+              </strong>
+            </div>
+            <div>
+              <span>Recibo</span>
+              <strong>{locacaoEmEdicao?.recibo_numero || '-'}</strong>
+            </div>
+          </div>
+
+          <div className="locacao-edicao-campo">
+            <label htmlFor="edit-cliente-nome">Nome do cliente</label>
+            <input
+              id="edit-cliente-nome"
+              placeholder="Digite o nome do cliente"
+              value={editClienteNome}
+              onChange={e => setEditClienteNome(e.target.value)}
+            />
+          </div>
+
+          <div className="locacao-edicao-campo">
+            <label htmlFor="edit-cliente-telefone">Telefone (WhatsApp)</label>
+            <input
+              id="edit-cliente-telefone"
+              placeholder="Digite o telefone do cliente"
+              value={editClienteTelefone}
+              onChange={e => setEditClienteTelefone(e.target.value)}
+            />
+          </div>
+
+          <div className="locacao-edicao-campo">
+            <label htmlFor="edit-cliente-documento">Documento / Observação</label>
+            <input
+              id="edit-cliente-documento"
+              placeholder="Digite o documento ou observação"
+              value={editClienteDocumento}
+              onChange={e => setEditClienteDocumento(e.target.value)}
+            />
+          </div>
+
+          <div className="locacao-edicao-acoes">
+            <button
+              type="button"
+              className="locacao-edicao-btn secundario"
+              onClick={fecharModalEdicao}
+              disabled={salvandoEdicao}
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              className="locacao-edicao-btn principal"
+              onClick={handleSalvarEdicaoCliente}
+              disabled={salvandoEdicao}
+            >
+              {salvandoEdicao ? 'Salvando...' : 'Salvar alterações'}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
