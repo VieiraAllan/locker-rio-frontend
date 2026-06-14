@@ -12,7 +12,7 @@ function LocacoesAtivasPage({ showToast }) {
   const [loading, setLoading] = useState(true);
   const [gerandoReciboId, setGerandoReciboId] = useState(null);
   const [gerandoMensagemChave, setGerandoMensagemChave] = useState(null);
-  const [idiomaWhatsApp, setIdiomaWhatsApp] = useState('pt');
+  const [idiomaWhatsAppPorLocacao, setIdiomaWhatsAppPorLocacao] = useState({});
   const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
   const [locacaoEmEdicao, setLocacaoEmEdicao] = useState(null);
   const [editClienteNome, setEditClienteNome] = useState('');
@@ -54,6 +54,17 @@ function LocacoesAtivasPage({ showToast }) {
     window.open(url.toString(), '_blank', 'noopener,noreferrer');
   }
 
+  function obterIdiomaWhatsAppLocacao(locacaoId) {
+    return idiomaWhatsAppPorLocacao[locacaoId] || '';
+  }
+
+  function alterarIdiomaWhatsAppLocacao(locacaoId, idioma) {
+    setIdiomaWhatsAppPorLocacao(prev => ({
+      ...prev,
+      [locacaoId]: idioma
+    }));
+  }
+
   async function handleAbrirRecibo(locacaoId) {
     try {
       setGerandoReciboId(locacaoId);
@@ -67,9 +78,15 @@ function LocacoesAtivasPage({ showToast }) {
 
   async function handleEnviarMensagem(locacao, tipo) {
     const telefone = String(locacao?.cliente_telefone || '').trim();
+    const idioma = obterIdiomaWhatsAppLocacao(locacao.id);
 
     if (!telefone) {
       showToast('Esta locação não possui telefone cadastrado.', 'error');
+      return;
+    }
+
+    if (!idioma) {
+      showToast('Selecione o idioma desta locação antes de enviar a mensagem.', 'error');
       return;
     }
 
@@ -80,7 +97,7 @@ function LocacoesAtivasPage({ showToast }) {
 
       const resultado = await gerarMensagemWhatsApp(locacao.id, {
         tipo,
-        idioma: idiomaWhatsApp,
+        idioma,
         telefone
       });
 
@@ -184,19 +201,6 @@ function LocacoesAtivasPage({ showToast }) {
           <span className="locacoes-total">
             {locacoes.length} ativa{locacoes.length === 1 ? '' : 's'}
           </span>
-
-          <div className="locacoes-whatsapp-config">
-            <label htmlFor="locacoes-whatsapp-idioma">Idioma WhatsApp</label>
-            <select
-              id="locacoes-whatsapp-idioma"
-              value={idiomaWhatsApp}
-              onChange={e => setIdiomaWhatsApp(e.target.value)}
-            >
-              <option value="pt">Português</option>
-              <option value="en">Inglês</option>
-              <option value="es">Espanhol</option>
-            </select>
-          </div>
         </div>
       </div>
 
@@ -212,6 +216,7 @@ function LocacoesAtivasPage({ showToast }) {
             );
 
             const semTelefone = !String(locacao.cliente_telefone || '').trim();
+            const idiomaSelecionado = obterIdiomaWhatsAppLocacao(locacao.id);
 
             return (
               <div key={locacao.id} className="locacao-card">
@@ -309,6 +314,22 @@ function LocacoesAtivasPage({ showToast }) {
                         Sem telefone cadastrado
                       </small>
                     )}
+                  </div>
+
+                  <div className="locacao-whatsapp-config-card">
+                    <label htmlFor={`locacao-whatsapp-idioma-${locacao.id}`}>
+                      Idioma desta locação
+                    </label>
+                    <select
+                      id={`locacao-whatsapp-idioma-${locacao.id}`}
+                      value={idiomaSelecionado}
+                      onChange={e => alterarIdiomaWhatsAppLocacao(locacao.id, e.target.value)}
+                    >
+                      <option value="">Selecione o idioma</option>
+                      <option value="pt">Português</option>
+                      <option value="en">Inglês</option>
+                      <option value="es">Espanhol</option>
+                    </select>
                   </div>
 
                   <div className="locacao-whatsapp-acoes">

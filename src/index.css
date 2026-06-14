@@ -5036,3 +5036,53 @@ body.dark .locacao-edicao-btn.principal:hover:not(:disabled) {
     width: 100%;
   }
 }
+
+/* ======================================================
+   LOCAÇÕES ATIVAS — IDIOMA WHATSAPP POR CARD
+====================================================== */
+.locacao-whatsapp-config-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.locacao-whatsapp-config-card label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-soft, var(--text-main));
+}
+
+.locacao-whatsapp-config-card select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font: inherit;
+}
+
+.locacao-whatsapp-config-card select:focus {
+  outline: none;
+  border-color: var(--accent, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* ======================================================
+   DARK MODE — IDIOMA WHATSAPP POR CARD
+====================================================== */
+body.dark .locacao-whatsapp-config-card label {
+  color: #fff;
+}
+
+body.dark .locacao-whatsapp-config-card select {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+  color: #fff;
+}
+
+body.dark .locacao-whatsapp-config-card select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
