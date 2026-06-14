@@ -23,7 +23,6 @@ function LockersPage({ showToast, usuarioAtual }) {
   const [locacoesAtivasDetalhes, setLocacoesAtivasDetalhes] = useState([]);
   const [modalType, setModalType] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  // ✅ NOVO: identifica locação sem locker
   const [isAvulsa, setIsAvulsa] = useState(false);
   const [clienteNome, setClienteNome] = useState('');
   const [clienteTelefone, setClienteTelefone] = useState('');
@@ -527,15 +526,8 @@ function LockersPage({ showToast, usuarioAtual }) {
     closeModal();
   }
 
-  async function confirmarFinalizacao() {
+  function prepararConfirmacaoFinalizacao() {
     if (submitting) return;
-
-    const mensagemConfirmacao = isAvulsa
-      ? `Confirmar finalização da bagagem avulsa de ${selectedAvulsa?.cliente_nome}?`
-      : `Confirmar finalização da locação do armário ${selectedLocker.numero}?`;
-
-    const confirmar = window.confirm(mensagemConfirmacao);
-    if (!confirmar) return;
 
     const valorExcedenteNormalizado =
       valorExcedente.trim() === ''
@@ -569,6 +561,55 @@ function LockersPage({ showToast, usuarioAtual }) {
         'O valor pago no fechamento não pode ser maior que o valor pendente.',
         'error'
       );
+      return;
+    }
+
+    setModalType('confirmar_finalizacao');
+  }
+
+  function voltarParaFinalizacao() {
+    setModalType('finalizar');
+  }
+
+  async function confirmarFinalizacaoDefinitiva() {
+    if (submitting) return;
+
+    const valorExcedenteNormalizado =
+      valorExcedente.trim() === ''
+        ? null
+        : Number(String(valorExcedente).replace(',', '.'));
+
+    if (
+      valorExcedenteNormalizado !== null &&
+      (Number.isNaN(valorExcedenteNormalizado) || valorExcedenteNormalizado < 0)
+    ) {
+      showToast('Valor do excedente inválido.', 'error');
+      setModalType('finalizar');
+      return;
+    }
+
+    if (valorPagoFinal.trim() === '') {
+      showToast('Informe o valor pago no fechamento (pode ser zero).', 'error');
+      setModalType('finalizar');
+      return;
+    }
+
+    const valorPagoFinalNormalizado = Number(
+      String(valorPagoFinal).replace(',', '.')
+    );
+
+    if (Number.isNaN(valorPagoFinalNormalizado) || valorPagoFinalNormalizado < 0) {
+      showToast('Valor pago no fechamento inválido.', 'error');
+      setModalType('finalizar');
+      return;
+    }
+
+    if (valorPagoFinalNormalizado > resumoFinalizacao.valorPendente) {
+      showToast(
+        'O valor pago no fechamento não pode ser maior que o valor pendente.',
+        'error'
+      );
+      setModalType('finalizar');
       return;
     }
 
@@ -608,6 +649,7 @@ function LockersPage({ showToast, usuarioAtual }) {
     } catch (err) {
       showToast(err.message || 'Erro ao finalizar locação.', 'error');
       setSubmitting(false);
+      setModalType('finalizar');
     }
   }
 
@@ -865,7 +907,7 @@ function LockersPage({ showToast, usuarioAtual }) {
             : `Finalizar locação - Armário ${selectedLocker?.numero}`
         }
         onClose={closeModal}
-        onConfirm={confirmarFinalizacao}
+        onConfirm={prepararConfirmacaoFinalizacao}
         confirmDisabled={submitting}
       >
         <div className="finalizacao-grid">
@@ -1004,9 +1046,76 @@ function LockersPage({ showToast, usuarioAtual }) {
           </section>
         </div>
 
-        <button onClick={confirmarFinalizacao} disabled={submitting}>
+        <button onClick={prepararConfirmacaoFinalizacao} disabled={submitting}>
           {submitting ? 'Finalizando...' : 'Finalizar locação'}
         </button>
+      </Modal>
+
+      <Modal
+        isOpen={modalType === 'confirmar_finalizacao'}
+        title="Confirmar finalização"
+        onClose={closeModal}
+      >
+        <div className="confirmacao-finalizacao-modal">
+          <p className="confirmacao-finalizacao-texto">
+            Revise as informações abaixo antes de concluir a finalização da locação.
+          </p>
+
+          <div className="confirmacao-finalizacao-resumo">
+            <div>
+              <span>Cliente</span>
+              <strong>{selectedLocacao?.cliente_nome || selectedAvulsa?.cliente_nome || '-'}</strong>
+            </div>
+            <div>
+              <span>Referência</span>
+              <strong>
+                {isAvulsa
+                  ? 'Bagagem avulsa'
+                  : `Armário ${selectedLocacao?.lockers?.join(', ') || selectedLocker?.numero || '-'}`}
+              </strong>
+            </div>
+            <div>
+              <span>Valor pago no fechamento</span>
+              <strong>{formatarMoeda(valorPagoFinal || 0)}</strong>
+            </div>
+            <div>
+              <span>Excedente informado</span>
+              <strong>
+                {valorExcedente.trim() === ''
+                  ? 'Não informado'
+                  : formatarMoeda(Number(String(valorExcedente).replace(',', '.')) || 0)}
+              </strong>
+            </div>
+            <div>
+              <span>Mensagem WhatsApp</span>
+              <strong>
+                {telefoneWhatsApp.trim()
+                  ? `${tipoMensagemWhatsApp} · ${idiomaMensagemWhatsApp}`
+                  : 'Não enviar'}
+              </strong>
+            </div>
+          </div>
+
+          <div className="confirmacao-finalizacao-acoes">
+            <button
+              type="button"
+              className="confirmacao-finalizacao-btn secundario"
+              onClick={voltarParaFinalizacao}
+              disabled={submitting}
+            >
+              Voltar
+            </button>
+
+            <button
+              type="button"
+              className="confirmacao-finalizacao-btn principal"
+              onClick={confirmarFinalizacaoDefinitiva}
+              disabled={submitting}
+            >
+              {submitting ? 'Finalizando...' : 'Confirmar finalização'}
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
