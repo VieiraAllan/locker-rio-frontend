@@ -5370,3 +5370,331 @@ body.dark .finalizacao-ajuste-toggle:hover:not(:disabled) {
   color: #000000;
   filter: brightness(1.05);
 }
+
+/* ======================================================
+   FINALIZAÇÃO — REFINO VISUAL FINAL
+====================================================== */
+
+/* Card financeiro com mais respiro */
+.finalizacao-card-financeiro {
+  gap: 14px;
+}
+
+/* Métricas financeiras mais organizadas */
+.finalizacao-metricas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.finalizacao-metrica {
+  padding: 12px 14px;
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.finalizacao-metrica span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-soft, var(--text-main));
+  line-height: 1.2;
+}
+
+.finalizacao-metrica strong {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+/* Destaque do valor principal */
+.finalizacao-metrica.destaque {
+  border-color: #4fd1a5;
+  background: rgba(79, 209, 165, 0.10);
+  box-shadow: 0 0 0 1px rgba(79, 209, 165, 0.12);
+}
+
+.finalizacao-metrica.destaque span {
+  color: #4fd1a5;
+}
+
+.finalizacao-metrica.destaque strong {
+  font-size: 22px;
+  color: #4fd1a5;
+}
+
+/* Campo principal da operação */
+.finalizacao-campo-principal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.finalizacao-campo-principal label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-soft, var(--text-main));
+}
+
+.finalizacao-campo-principal input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font: inherit;
+  font-size: 15px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.finalizacao-campo-principal input:focus {
+  outline: none;
+  border-color: #4fd1a5;
+  box-shadow: 0 0 0 3px rgba(79, 209, 165, 0.14);
+}
+
+/* Campo secundário (ajuste manual) menos chamativo */
+.finalizacao-campo-secundario label {
+  color: var(--text-soft, var(--text-main));
+  font-weight: 600;
+}
+
+.finalizacao-campo-secundario input:focus {
+  border-color: var(--accent, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Área do ajuste manual */
+.finalizacao-ajuste-manual-area {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Botão do ajuste manual como secundário de verdade */
+.finalizacao-ajuste-toggle {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px dashed var(--input-border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-main);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, filter 0.2s ease, background 0.2s ease;
+}
+
+.finalizacao-ajuste-toggle:hover:not(:disabled) {
+  border-color: var(--accent, #2563eb);
+  background: rgba(37, 99, 235, 0.05);
+  filter: brightness(0.99);
+}
+
+.finalizacao-ajuste-toggle:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.finalizacao-ajuste-toggle:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Selects do WhatsApp mais consistentes */
+.whatsapp-config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.whatsapp-config-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.whatsapp-config-item label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-soft, var(--text-main));
+}
+
+.whatsapp-config-item select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.whatsapp-config-item select:focus {
+  outline: none;
+  border-color: var(--accent, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Input do telefone do WhatsApp mais alinhado */
+.finalizacao-card-financeiro > input:last-child {
+  margin-top: 12px;
+}
+
+/* Botão principal do modal de finalização */
+.finalizacao-card-financeiro + button,
+.finalizacao-grid + button {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 12px;
+  background: #4fd1a5;
+  color: #ffffff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.finalizacao-card-financeiro + button:hover:not(:disabled),
+.finalizacao-grid + button:hover:not(:disabled) {
+  filter: brightness(0.96);
+}
+
+.finalizacao-card-financeiro + button:active:not(:disabled),
+.finalizacao-grid + button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.finalizacao-card-financeiro + button:disabled,
+.finalizacao-grid + button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Modal de confirmação com melhor leitura */
+.confirmacao-finalizacao-resumo {
+  gap: 12px;
+}
+
+.confirmacao-finalizacao-resumo > div {
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.confirmacao-finalizacao-resumo > div span {
+  min-width: 140px;
+}
+
+.confirmacao-finalizacao-resumo > div strong {
+  text-align: right;
+  flex: 1;
+}
+
+/* ======================================================
+   DARK MODE — REFINO FINAL
+====================================================== */
+body.dark .finalizacao-metrica {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+}
+
+body.dark .finalizacao-metrica span {
+  color: var(--text-main);
+}
+
+body.dark .finalizacao-metrica strong {
+  color: #ffffff;
+}
+
+body.dark .finalizacao-metrica.destaque {
+  background: rgba(79, 209, 165, 0.12);
+  border-color: #4fd1a5;
+  box-shadow: 0 0 0 1px rgba(79, 209, 165, 0.16);
+}
+
+body.dark .finalizacao-metrica.destaque span,
+body.dark .finalizacao-metrica.destaque strong {
+  color: #4fd1a5;
+}
+
+body.dark .finalizacao-campo-principal label,
+body.dark .whatsapp-config-item label {
+  color: #ffffff;
+}
+
+body.dark .finalizacao-campo-principal input,
+body.dark .whatsapp-config-item select {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+  color: #ffffff;
+}
+
+body.dark .finalizacao-campo-principal input:focus {
+  border-color: #4fd1a5;
+  box-shadow: 0 0 0 3px rgba(79, 209, 165, 0.14);
+}
+
+body.dark .whatsapp-config-item select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+body.dark .finalizacao-ajuste-toggle {
+  border-color: var(--input-border);
+  color: #ffffff;
+  background: transparent;
+}
+
+body.dark .finalizacao-ajuste-toggle:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.08);
+  color: #000000;
+}
+
+body.dark .confirmacao-finalizacao-resumo > div span {
+  color: var(--text-main);
+}
+
+body.dark .confirmacao-finalizacao-resumo > div strong {
+  color: #ffffff;
+}
+
+/* ======================================================
+   RESPONSIVO
+====================================================== */
+@media (max-width: 768px) {
+  .whatsapp-config-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .confirmacao-finalizacao-resumo > div {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .confirmacao-finalizacao-resumo > div strong {
+    text-align: left;
+    width: 100%;
+  }
+
+  .finalizacao-metrica strong {
+    font-size: 17px;
+  }
+
+  .finalizacao-metrica.destaque strong {
+    font-size: 20px;
+  }
+}
