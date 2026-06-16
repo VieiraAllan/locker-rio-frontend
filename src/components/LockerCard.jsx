@@ -13,27 +13,36 @@ function LockerCard({
     manutencao: 'Manutenção'
   };
 
+  const iconeAcao =
+    status === 'manutencao'
+      ? '↻'
+      : '🛠';
+
   return (
     <div
       className={`locker-card ${status}`}
       onClick={onClick}
     >
-      <div className="locker-numero">{numero}</div>
-      <div className="locker-status">{statusLabel[status]}</div>
-
       {exibirAcaoManutencao && textoAcaoManutencao && onAcaoManutencao && (
         <button
           type="button"
-          className="locker-manutencao-btn"
+          className={`locker-manutencao-icon-btn ${
+            status === 'manutencao' ? 'reativar' : 'manutencao'
+          }`}
+          title={textoAcaoManutencao}
+          aria-label={textoAcaoManutencao}
           onClick={event => {
             event.stopPropagation();
             onAcaoManutencao();
           }}
           disabled={desabilitarAcaoManutencao}
         >
-          {textoAcaoManutencao}
+          {iconeAcao}
         </button>
       )}
+
+      <div className="locker-numero">{numero}</div>
+      <div className="locker-status">{statusLabel[status]}</div>
     </div>
   );
 }
