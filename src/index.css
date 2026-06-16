@@ -5806,3 +5806,22 @@ body.dark .locker-manutencao-icon-btn.reativar:hover:not(:disabled) {
     pointer-events: auto;
   }
 }
+
+.login-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #1f8f63;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.login-logo-image {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  display: block;
+}

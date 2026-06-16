@@ -2,6 +2,8 @@ import { useState } from 'react';
 
 import { loginUsuario } from '../services/api';
 
+import logoCliente from '../assets/logo-cliente.svg';
+
 function LoginPage({ showToast, onLogin }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -27,19 +29,19 @@ function LoginPage({ showToast, onLogin }) {
 
       const { usuario, token } = await loginUsuario(emailLimpo, senha);
 
-localStorage.setItem(
-  'lockerRioUsuario',
-  JSON.stringify(usuario)
-);
+      localStorage.setItem(
+        'lockerRioUsuario',
+        JSON.stringify(usuario)
+      );
 
-localStorage.setItem(
-  'lockerRioToken',
-  token
-);
+      localStorage.setItem(
+        'lockerRioToken',
+        token
+      );
 
-showToast('Login realizado com sucesso.', 'success');
+      showToast('Login realizado com sucesso.', 'success');
 
-onLogin(usuario);
+      onLogin(usuario);
     } catch (err) {
       showToast(
         err.message || 'Erro ao realizar login.',
@@ -54,7 +56,13 @@ onLogin(usuario);
     <div className="login-page">
       <div className="login-card">
         <div className="login-brand">
-          <span className="login-logo">▣</span>
+          <span className="login-logo">
+            <img
+              src={logoCliente}
+              alt="Logo Locker Rio"
+              className="login-logo-image"
+            />
+          </span>
 
           <div>
             <h1>Locker Rio</h1>
