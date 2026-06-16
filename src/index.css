@@ -5698,3 +5698,146 @@ body.dark .confirmacao-finalizacao-resumo > div strong {
     font-size: 20px;
   }
 }
+
+/* ======================================================
+   LOCKER — AÇÃO DE MANUTENÇÃO NO CARD
+====================================================== */
+.locker-card {
+  position: relative;
+}
+
+.locker-manutencao-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px dashed var(--input-border);
+  background: transparent;
+  color: var(--text-main);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, filter 0.2s ease;
+}
+
+.locker-manutencao-btn:hover:not(:disabled) {
+  border-color: var(--accent, #2563eb);
+  background: rgba(37, 99, 235, 0.05);
+  filter: brightness(0.99);
+}
+
+.locker-manutencao-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ======================================================
+   MODAL — MANUTENÇÃO DO LOCKER
+====================================================== */
+.locker-manutencao-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.locker-manutencao-texto {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-main);
+}
+
+.locker-manutencao-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.locker-manutencao-btn-modal {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--input-border);
+  font: inherit;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.locker-manutencao-btn-modal:hover:not(:disabled) {
+  filter: brightness(0.98);
+}
+
+.locker-manutencao-btn-modal:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.locker-manutencao-btn-modal:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.locker-manutencao-btn-modal.secundario {
+  background: var(--card-bg);
+  color: var(--text-main);
+  border-color: var(--input-border);
+}
+
+.locker-manutencao-btn-modal.secundario:hover:not(:disabled) {
+  border-color: var(--accent, #2563eb);
+}
+
+.locker-manutencao-btn-modal.principal {
+  background: var(--card-bg);
+  color: var(--text-main);
+  border-color: var(--input-border);
+}
+
+.locker-manutencao-btn-modal.principal:hover:not(:disabled) {
+  border-color: var(--accent, #2563eb);
+}
+
+/* ======================================================
+   DARK MODE
+====================================================== */
+body.dark .locker-manutencao-btn {
+  color: #ffffff;
+  border-color: var(--input-border);
+}
+
+body.dark .locker-manutencao-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.08);
+  color: #000000;
+}
+
+body.dark .locker-manutencao-texto {
+  color: #ffffff;
+}
+
+body.dark .locker-manutencao-btn-modal.secundario,
+body.dark .locker-manutencao-btn-modal.principal {
+  background: var(--card-bg);
+  border-color: var(--input-border);
+  color: #ffffff;
+}
+
+body.dark .locker-manutencao-btn-modal.secundario:hover:not(:disabled),
+body.dark .locker-manutencao-btn-modal.principal:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.08);
+  color: #000000;
+}
+
+/* ======================================================
+   RESPONSIVO
+====================================================== */
+@media (max-width: 768px) {
+  .locker-manutencao-acoes {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .locker-manutencao-btn-modal {
+    width: 100%;
+  }
+}

@@ -9,7 +9,8 @@ import {
   gerarMensagemWhatsApp,
   getAvulsasAtivas,
   getConfiguracoes,
-  getLocacoesAtivas
+  getLocacoesAtivas,
+  atualizarStatusLocker
 } from '../services/api';
 
 function LockersPage({ showToast, usuarioAtual }) {
@@ -47,6 +48,8 @@ function LockersPage({ showToast, usuarioAtual }) {
   const [idiomaMensagemAbertura, setIdiomaMensagemAbertura] = useState('');
   const [abrindoWhatsAppAbertura, setAbrindoWhatsAppAbertura] = useState(false);
   const [ajusteManualExcedenteAberto, setAjusteManualExcedenteAberto] = useState(false);
+  const [lockerManutencaoAlvo, setLockerManutencaoAlvo] = useState(null);
+  const [salvandoManutencao, setSalvandoManutencao] = useState(false);
 
   const nomeRef = useRef(null);
   const telefoneRef = useRef(null);
@@ -67,6 +70,8 @@ function LockersPage({ showToast, usuarioAtual }) {
     'administrador',
     'gerente'
   ].some(perfil => perfilAtualNormalizado.includes(perfil));
+
+  const podeGerenciarManutencao = podeAjustarManualFinalizacao;
 
   function formatarMoeda(valor) {
     return Number(valor || 0).toLocaleString('pt-BR', {
@@ -357,6 +362,43 @@ function LockersPage({ showToast, usuarioAtual }) {
     setModalType('finalizar');
   }
 
+  function abrirModalManutencao(locker) {
+    setLockerManutencaoAlvo(locker);
+    setModalType('manutencao_locker');
+  }
+
+  function fecharModalManutencao() {
+    setLockerManutencaoAlvo(null);
+    setSalvandoManutencao(false);
+
+    if (modalType === 'manutencao_locker') {
+      setModalType(null);
+    }
+  }
+
+  async function confirmarAlteracaoManutencao() {
+    if (!lockerManutencaoAlvo?.id || salvandoManutencao) return;
+
+    const novoStatus =
+      lockerManutencaoAlvo.status === 'manutencao' ? 'disponivel' : 'manutencao';
+
+    try {
+      setSalvandoManutencao(true);
+      await atualizarStatusLocker(lockerManutencaoAlvo.id, novoStatus);
+      showToast(
+        novoStatus === 'manutencao'
+          ? 'Locker colocado em manutenção com sucesso.'
+          : 'Locker reativado com sucesso.',
+        'success'
+      );
+      await carregarLockers();
+      fecharModalManutencao();
+    } catch (err) {
+      showToast(err.message || 'Erro ao atualizar manutenção do locker.', 'error');
+      setSalvandoManutencao(false);
+    }
+  }
+
   function handleAvulsaClick() {
     if (!permitirBagagemAvulsa) {
       showToast('Bagagem avulsa está desabilitada nas configurações.', 'error');
@@ -387,6 +429,8 @@ function LockersPage({ showToast, usuarioAtual }) {
     setSelectedLocker(null);
     setSelectedAvulsa(null);
     setSelectedLocacao(null);
+    setLockerManutencaoAlvo(null);
+    setSalvandoManutencao(false);
     setModalType(null);
     resetModal();
   }
@@ -583,12 +627,12 @@ function LockersPage({ showToast, usuarioAtual }) {
 
     if (ajusteManualExcedenteAberto && podeAjustarManualFinalizacao) {
       if (valorExcedente.trim() === '') {
-        showToast('Informe a cobrança adicional manual.', 'error');
+        showToast('Informe a cobrança de excedente manual.', 'error');
         return;
       }
 
       if (Number.isNaN(valorExcedenteManualNormalizado) || valorExcedenteManualNormalizado < 0) {
-        showToast('Cobrança adicional manual inválida.', 'error');
+        showToast('Cobrança de excedente manual inválida.', 'error');
         return;
       }
     }
@@ -630,13 +674,13 @@ function LockersPage({ showToast, usuarioAtual }) {
 
     if (ajusteManualExcedenteAberto && podeAjustarManualFinalizacao) {
       if (valorExcedente.trim() === '') {
-        showToast('Informe a cobrança adicional manual.', 'error');
+        showToast('Informe a cobrança de excedente manual.', 'error');
         setModalType('finalizar');
         return;
       }
 
       if (Number.isNaN(valorExcedenteManualNormalizado) || valorExcedenteManualNormalizado < 0) {
-        showToast('Cobrança adicional manual inválida.', 'error');
+        showToast('Cobrança de excedente manual inválida.', 'error');
         setModalType('finalizar');
         return;
       }
@@ -753,6 +797,9 @@ function LockersPage({ showToast, usuarioAtual }) {
               numero={locker.numero}
               status={locker.status}
               onClick={() => handleLockerClick(locker)}
+              exibirAcaoManutencao={podeGerenciarManutencao && locker.status !== 'ocupado'}
+              textoAcaoManutencao={locker.status === 'manutencao' ? 'Reativar' : 'Manutenção'}
+              onAcaoManutencao={() => abrirModalManutencao(locker)}
             />
           ))}
 
@@ -773,6 +820,44 @@ function LockersPage({ showToast, usuarioAtual }) {
           ))}
         </div>
       </div>
+
+      <Modal
+        isOpen={modalType === 'manutencao_locker'}
+        title={lockerManutencaoAlvo?.status === 'manutencao' ? 'Reativar locker' : 'Colocar locker em manutenção'}
+        onClose={fecharModalManutencao}
+      >
+        <div className="locker-manutencao-modal">
+          <p className="locker-manutencao-texto">
+            {lockerManutencaoAlvo?.status === 'manutencao'
+              ? `O armário ${lockerManutencaoAlvo?.numero} voltará a ficar disponível para novas locações.`
+              : `O armário ${lockerManutencaoAlvo?.numero} ficará indisponível para novas locações até ser reativado.`}
+          </p>
+
+          <div className="locker-manutencao-acoes">
+            <button
+              type="button"
+              className="locker-manutencao-btn-modal secundario"
+              onClick={fecharModalManutencao}
+              disabled={salvandoManutencao}
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              className="locker-manutencao-btn-modal principal"
+              onClick={confirmarAlteracaoManutencao}
+              disabled={salvandoManutencao}
+            >
+              {salvandoManutencao
+                ? 'Salvando...'
+                : lockerManutencaoAlvo?.status === 'manutencao'
+                  ? 'Confirmar reativação'
+                  : 'Confirmar manutenção'}
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal
         key={isAvulsa ? 'modal-nova-avulsa' : 'modal-nova-locker'}
@@ -1038,7 +1123,7 @@ function LockersPage({ showToast, usuarioAtual }) {
                 <strong>{resumoFinalizacao.horasExcedentes}</strong>
               </div>
               <div>
-                <span>Cobrança de excendete calculada</span>
+                <span>Cobrança de excedente calculada</span>
                 <strong>{formatarMoeda(resumoFinalizacao.valorExcedenteSugerido)}</strong>
               </div>
             </div>
@@ -1104,9 +1189,9 @@ function LockersPage({ showToast, usuarioAtual }) {
 
                 {ajusteManualExcedenteAberto && (
                   <div className="finalizacao-campo-principal finalizacao-campo-secundario">
-                    <label>Cobrança adicional manual</label>
+                    <label>Cobrança de excedente manual</label>
                     <input
-                      placeholder="Cobrança adicional manual"
+                      placeholder="Cobrança de excedente manual"
                       value={valorExcedente}
                       onChange={e => setValorExcedente(e.target.value)}
                     />
@@ -1186,7 +1271,7 @@ function LockersPage({ showToast, usuarioAtual }) {
               <strong>{formatarMoeda(normalizarValorMonetario(valorPagoFinal) || 0)}</strong>
             </div>
             <div>
-              <span>Cobrança adicional</span>
+              <span>Cobrança de excedente</span>
               <strong>{formatarMoeda(cobrancaAdicionalEfetiva || 0)}</strong>
             </div>
             <div>

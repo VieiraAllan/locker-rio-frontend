@@ -21,6 +21,25 @@ export async function getLockers() {
   return data.data;
 }
 
+export async function atualizarStatusLocker(lockerId, status) {
+  const response = await fetch(`${API_URL}/lockers/${lockerId}/status`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders()
+    },
+    body: JSON.stringify({ status })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Erro ao atualizar status do locker');
+  }
+
+  return data.data;
+}
+
 /* =========================
    CRIAR LOCAÇÃO
 ========================= */
