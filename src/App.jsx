@@ -189,6 +189,8 @@ function App() {
         <LoginPage
           showToast={showToast}
           onLogin={handleLogin}
+          darkMode={darkMode}
+          toggleDarkMode={toggleDarkMode}
         />
       </>
     );

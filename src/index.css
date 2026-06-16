@@ -5808,8 +5808,8 @@ body.dark .locker-manutencao-icon-btn.reativar:hover:not(:disabled) {
 }
 
 .login-logo {
-  width: 42px;
-  height: 42px;
+  width: 58px;
+  height: 58px;
   border-radius: 12px;
   background: #1f8f63;
   display: flex;
@@ -5820,8 +5820,90 @@ body.dark .locker-manutencao-icon-btn.reativar:hover:not(:disabled) {
 }
 
 .login-logo-image {
-  width: 38px;
-  height: 38px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
   display: block;
+}
+
+.login-card {
+  position: relative;
+}
+
+.login-theme-toggle {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--input-border);
+  border-radius: 999px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.login-theme-toggle:hover {
+  filter: brightness(0.98);
+  border-color: var(--accent, #2563eb);
+}
+
+.login-theme-toggle:active {
+  transform: translateY(1px);
+}
+
+body.dark .login-theme-toggle {
+  background: var(--card-bg);
+  color: #ffffff;
+  border-color: var(--input-border);
+}
+
+body.dark .login-theme-toggle:hover {
+  border-color: var(--accent);
+}
+
+/* ======================================================
+   LOGIN — REAPROVEITAR TOGGLE DARK MODE MENOR
+====================================================== */
+.login-card {
+  position: relative;
+}
+
+.login-theme-wrapper {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-switch-login {
+  transform: scale(0.72);
+  transform-origin: top right;
+}
+
+.login-card .login-brand {
+  padding-right: 58px;
+}
+
+@media (max-width: 768px) {
+  .login-theme-wrapper {
+    top: 12px;
+    right: 12px;
+  }
+
+  .theme-switch-login {
+    transform: scale(0.66);
+  }
+
+  .login-card .login-brand {
+    padding-right: 52px;
+  }
 }
