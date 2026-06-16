@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = String(import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
 function getAuthHeaders() {
   const token = localStorage.getItem('lockerRioToken');
