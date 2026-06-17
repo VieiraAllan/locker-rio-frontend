@@ -144,20 +144,20 @@ function LockersPage({ showToast, usuarioAtual }) {
     configuracoes?.operacao?.valorHoraExcedente ?? 5
   );
 
-  const valorTotalLocacao = (() => {
-    if (inRioTour && permitirInRioTour) {
-      return 0;
-    }
+  const permitirBagagemAvulsa =
+    configuracoes?.operacao?.permitirBagagemAvulsa !== false;
+  const permitirInRioTour =
+    configuracoes?.operacao?.permitirInRioTour !== false;
+  const exigirLacres =
+    configuracoes?.operacao?.exigirLacres !== false;
+  const exigirTelefoneCliente =
+    configuracoes?.operacao?.exigirTelefoneCliente !== false;
 
-    let total = 0;
-
-    if (!isAvulsa) {
-      total += valorLockerConfigurado * quantidadeLockersSelecionados;
-    }
-
-    total += valorBagagemAvulsaConfigurado * totalVolumes;
-    return total;
-  })();
+  const valorTotalLocacao =
+    inRioTour && permitirInRioTour
+      ? 0
+      : (isAvulsa ? 0 : valorLockerConfigurado * quantidadeLockersSelecionados) +
+        valorBagagemAvulsaConfigurado * totalVolumes;
 
   function calcularResumoFinalizacao(locacao) {
     if (!locacao) {
@@ -231,15 +231,6 @@ function LockersPage({ showToast, usuarioAtual }) {
   const totalCobrarAgora = Number.isNaN(cobrancaAdicionalEfetiva)
     ? NaN
     : resumoFinalizacao.valorPendente + cobrancaAdicionalEfetiva;
-
-  const permitirBagagemAvulsa =
-    configuracoes?.operacao?.permitirBagagemAvulsa !== false;
-  const permitirInRioTour =
-    configuracoes?.operacao?.permitirInRioTour !== false;
-  const exigirLacres =
-    configuracoes?.operacao?.exigirLacres !== false;
-  const exigirTelefoneCliente =
-    configuracoes?.operacao?.exigirTelefoneCliente !== false;
 
   const totalDisponiveis = lockers.filter(
     locker => locker.status === 'disponivel'

@@ -5907,3 +5907,527 @@ body.dark .login-theme-toggle:hover {
     padding-right: 52px;
   }
 }
+
+/* ======================================================
+   LOGIN CARD — BORDA ANIMADA SUAVE
+====================================================== */
+.login-card-animated {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+.login-card-bg {
+  position: absolute;
+  inset: 2px;
+  z-index: 1;
+  border-radius: 18px;
+  background: var(--card-bg, rgba(255, 255, 255, 0.96));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.login-card-blob {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  width: 180px;
+  height: 180px;
+  border-radius: 999px;
+  background: #1f8f63; /* cor da marca */
+  opacity: 0.28;
+  filter: blur(18px);
+  animation: login-blob-bounce 7s infinite ease-in-out;
+  transform: translate(-50%, -50%);
+}
+
+.login-card-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* dark mode */
+body.dark .login-card-bg {
+  background: rgba(20, 24, 28, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.dark .login-card-blob {
+  background: #33c48d;
+  opacity: 0.22;
+}
+
+/* animação mais lenta e premium */
+@keyframes login-blob-bounce {
+  0% {
+    transform: translate(-50%, -50%) translate3d(-60px, -60px, 0);
+  }
+
+  25% {
+    transform: translate(-50%, -50%) translate3d(60px, -50px, 0);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) translate3d(70px, 55px, 0);
+  }
+
+  75% {
+    transform: translate(-50%, -50%) translate3d(-50px, 60px, 0);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) translate3d(-60px, -60px, 0);
+  }
+}
+
+/* ======================================================
+   VERSAO 1 — LOGIN + TOGGLE + LOGO + BORDA ANIMADA
+   BLOCO OTIMIZADO PARA SUBSTITUIR AS SECOES DUPLICADAS
+   DE LOGIN NO FINAL DO index.css
+====================================================== */
+
+/* ------------------------------
+   LOGIN — BASE
+------------------------------ */
+.login-page {
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at top left, rgba(242, 183, 5, 0.22), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(30, 127, 92, 0.16), transparent 32%),
+    linear-gradient(135deg, #f6f3ea 0%, #ffffff 48%, #eef7f2 100%);
+  color: var(--text-main);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 430px;
+  padding: 24px;
+  border-radius: 18px;
+  position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 22px 60px rgba(0, 0, 0, 0.18),
+    0 4px 18px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ------------------------------
+   LOGIN — BORDA ANIMADA (VERSAO SUAVE)
+------------------------------ */
+.login-card.login-card-animated {
+  overflow: hidden;
+  isolation: isolate;
+  background: transparent !important;
+}
+
+.login-card-animated .login-card-bg {
+  position: absolute;
+  inset: 2px;
+  z-index: 1;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.login-card-animated .login-card-blob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 190px;
+  height: 190px;
+  border-radius: 999px;
+  z-index: 0;
+  background: #1f8f63;
+  opacity: 0.34;
+  filter: blur(22px);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: login-blob-bounce 8s infinite ease-in-out;
+}
+
+.login-card-animated .login-card-content {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes login-blob-bounce {
+  0% {
+    transform: translate(-50%, -50%) translate3d(-64px, -64px, 0);
+  }
+  25% {
+    transform: translate(-50%, -50%) translate3d(66px, -52px, 0);
+  }
+  50% {
+    transform: translate(-50%, -50%) translate3d(74px, 58px, 0);
+  }
+  75% {
+    transform: translate(-50%, -50%) translate3d(-52px, 64px, 0);
+  }
+  100% {
+    transform: translate(-50%, -50%) translate3d(-64px, -64px, 0);
+  }
+}
+
+/* ------------------------------
+   LOGIN — TOGGLE MENOR
+------------------------------ */
+.login-theme-wrapper {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-switch-login {
+  transform: scale(0.72);
+  transform-origin: top right;
+}
+
+/* ------------------------------
+   LOGIN — BRANDING
+------------------------------ */
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding-right: 58px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.login-logo {
+  width: 58px;
+  height: 58px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: #1f8f63;
+  box-shadow: 0 8px 20px rgba(30, 127, 92, 0.28);
+}
+
+.login-logo-image {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  display: block;
+}
+
+.login-brand h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.1;
+  font-weight: 900;
+}
+
+.login-brand p {
+  margin: 5px 0 0;
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0.72;
+}
+
+/* ------------------------------
+   LOGIN — FORMULARIO
+------------------------------ */
+.login-form {
+  display: grid;
+  gap: 14px;
+}
+
+.login-form-header {
+  margin-bottom: 4px;
+}
+
+.login-form-header h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.login-form-header p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.72;
+}
+
+.login-field {
+  display: block;
+}
+
+.login-field span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  opacity: 0.86;
+}
+
+.login-field input {
+  width: 100%;
+  padding: 12px 13px;
+  border-radius: 10px;
+  border: 1px solid var(--input-border);
+  background: #fafafa;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 14px;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.login-field input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(30, 127, 92, 0.12);
+}
+
+.login-field input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.login-submit {
+  width: 100%;
+  margin-top: 4px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 850;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(30, 127, 92, 0.22);
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.login-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(0.96);
+  box-shadow: 0 14px 30px rgba(30, 127, 92, 0.26);
+}
+
+.login-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.login-footer {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.login-footer span {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.62;
+}
+
+/* ------------------------------
+   LOGIN — DARK MODE
+------------------------------ */
+body.dark .login-page {
+  background:
+    radial-gradient(circle at top left, rgba(242, 183, 5, 0.12), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(77, 214, 163, 0.12), transparent 32%),
+    linear-gradient(135deg, #11151b 0%, #171b22 48%, #101914 100%);
+  color: var(--text-main);
+}
+
+body.dark .login-card {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 22px 70px rgba(0, 0, 0, 0.48),
+    0 4px 18px rgba(0, 0, 0, 0.34);
+}
+
+body.dark .login-card-animated .login-card-bg {
+  background: rgba(20, 24, 28, 0.92);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark .login-card-animated .login-card-blob {
+  background: #33c48d;
+  opacity: 0.24;
+}
+
+body.dark .login-brand,
+body.dark .login-footer {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark .login-field input {
+  background: var(--input-bg);
+  color: var(--text-main);
+  border-color: var(--input-border);
+}
+
+body.dark .login-field input:focus {
+  background: #232832;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(77, 214, 163, 0.12);
+}
+
+/* ------------------------------
+   LOGIN — RESPONSIVO
+------------------------------ */
+@media (max-width: 760px) {
+  .login-page {
+    padding: 18px;
+  }
+
+  .login-card {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .login-theme-wrapper {
+    top: 12px;
+    right: 12px;
+  }
+
+  .theme-switch-login {
+    transform: scale(0.66);
+  }
+
+  .login-brand {
+    align-items: flex-start;
+    padding-right: 52px;
+  }
+
+  .login-brand h1 {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 420px) {
+  .login-page {
+    padding: 12px;
+  }
+
+  .login-card {
+    padding: 18px;
+  }
+
+  .login-logo {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+  }
+
+  .login-logo-image {
+    width: 40px;
+    height: 40px;
+  }
+
+  .login-form-header h2 {
+    font-size: 19px;
+  }
+}
+
+/* ======================================================
+   VERSAO 2 — SOMENTE A BORDA ANIMADA RODANDO
+   COLE ESTE BLOCO NO FINAL DO index.css
+====================================================== */
+
+.login-card.login-card-animated {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: transparent !important;
+}
+
+.login-card-animated .login-card-bg {
+  position: absolute;
+  inset: 2px;
+  z-index: 1;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.login-card-animated .login-card-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* blob maior e mais forte para o contorno aparecer */
+.login-card-animated .login-card-blob {
+  position: absolute;
+  z-index: 0;
+  width: 170px;
+  height: 170px;
+  border-radius: 999px;
+  background: #1f8f63;
+  opacity: 0.48;
+  filter: blur(26px);
+  pointer-events: none;
+  top: -48px;
+  left: -48px;
+  transform: none;
+  animation: login-border-orbit 9s linear infinite;
+}
+
+body.dark .login-card-animated .login-card-bg {
+  background: rgba(20, 24, 28, 0.92);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark .login-card-animated .login-card-blob {
+  background: #33c48d;
+  opacity: 0.34;
+}
+
+/* orbita nas bordas do card */
+@keyframes login-border-orbit {
+  0% {
+    top: -48px;
+    left: -48px;
+  }
+  25% {
+    top: -48px;
+    left: calc(100% - 122px);
+  }
+  50% {
+    top: calc(100% - 122px);
+    left: calc(100% - 122px);
+  }
+  75% {
+    top: calc(100% - 122px);
+    left: -48px;
+  }
+  100% {
+    top: -48px;
+    left: -48px;
+  }
+}
