@@ -114,13 +114,26 @@ function LockersPage({ showToast, usuarioAtual }) {
   }
 
   function abrirWhatsApp({ telefone, mensagem }) {
-    const apenasNumeros = String(telefone || '').replace(/\D/g, '');
+    const telefoneOriginal = String(telefone || '').trim();
+    const apenasNumeros = telefoneOriginal.replace(/\D/g, '');
 
     if (!apenasNumeros || !mensagem) return;
 
-    const telefoneNormalizado = apenasNumeros.startsWith('55')
-      ? apenasNumeros
-      : `55${apenasNumeros}`;
+    const semDuplicidadeBrasil = apenasNumeros.replace(/^(55){2,}/, '55');
+
+    let telefoneNormalizado = '';
+
+    if (telefoneOriginal.startsWith('+')) {
+      telefoneNormalizado = semDuplicidadeBrasil;
+    } else if (telefoneOriginal.startsWith('00')) {
+      telefoneNormalizado = telefoneOriginal.replace(/\D/g, '').replace(/^00/, '');
+    } else if (semDuplicidadeBrasil.startsWith('55')) {
+      telefoneNormalizado = semDuplicidadeBrasil;
+    } else if (apenasNumeros.length >= 12) {
+      telefoneNormalizado = apenasNumeros;
+    } else {
+      telefoneNormalizado = `55${apenasNumeros}`;
+    }
 
     const url = new URL('https://api.whatsapp.com/send');
     url.searchParams.set('phone', telefoneNormalizado);
