@@ -911,13 +911,13 @@ function LockersPage({ showToast, usuarioAtual }) {
         />
 
         <div className="valor-locacao-resumo">
-          <span>Valor total da locação</span>
+          <span>{ehInRioTour ? 'Valor definido para cliente In Rio Tour' : 'Valor total da locação'}</span>
           <strong>{formatarMoeda(valorTotalLocacaoExibido)}</strong>
         </div>
 
         <input
           ref={valorPagoRef}
-          placeholder="Valor pago agora"
+          placeholder={ehInRioTour ? 'Valor livre para cliente In Rio Tour' : 'Valor pago agora'}
           value={valorPago}
           onChange={e => setValorPago(e.target.value)}
         />
