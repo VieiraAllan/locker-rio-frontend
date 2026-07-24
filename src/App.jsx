@@ -60,6 +60,13 @@ function App() {
     }
   ];
 
+  function limparSessaoAutenticacao() {
+    sessionStorage.removeItem('lockerRioUsuario');
+    sessionStorage.removeItem('lockerRioToken');
+    localStorage.removeItem('lockerRioUsuario');
+    localStorage.removeItem('lockerRioToken');
+  }
+
   useEffect(() => {
     const savedDarkMode = localStorage.getItem('darkMode');
 
@@ -74,18 +81,44 @@ function App() {
 
   useEffect(() => {
     try {
-      const usuarioSalvo = localStorage.getItem('lockerRioUsuario');
+      localStorage.removeItem('lockerRioUsuario');
+      localStorage.removeItem('lockerRioToken');
 
-      if (usuarioSalvo) {
+      const usuarioSalvo = sessionStorage.getItem('lockerRioUsuario');
+      const tokenSalvo = sessionStorage.getItem('lockerRioToken');
+
+      if (usuarioSalvo && tokenSalvo) {
         const usuario = JSON.parse(usuarioSalvo);
         setUsuarioLogado(usuario);
+      } else {
+        limparSessaoAutenticacao();
+        setUsuarioLogado(null);
       }
     } catch {
-      localStorage.removeItem('lockerRioUsuario');
+      limparSessaoAutenticacao();
       setUsuarioLogado(null);
     } finally {
       setCarregandoSessao(false);
     }
+  }, []);
+
+  useEffect(() => {
+    function handleAuthExpired(event) {
+      limparSessaoAutenticacao();
+      setUsuarioLogado(null);
+      setPaginaAtual(paginas.PAINEL);
+      setMenuOpen(false);
+      showToast(
+        event.detail?.message || 'Sessão expirada. Faça login novamente.',
+        'error'
+      );
+    }
+
+    window.addEventListener('lockerRioAuthExpired', handleAuthExpired);
+
+    return () => {
+      window.removeEventListener('lockerRioAuthExpired', handleAuthExpired);
+    };
   }, []);
 
   useEffect(() => {
@@ -151,13 +184,10 @@ function App() {
   }
 
   function handleLogout() {
-    localStorage.removeItem('lockerRioUsuario');
-    localStorage.removeItem('lockerRioToken');
-
+    limparSessaoAutenticacao();
     setUsuarioLogado(null);
     setPaginaAtual(paginas.PAINEL);
     setMenuOpen(false);
-
     showToast('Sessão encerrada com sucesso.', 'success');
   }
 

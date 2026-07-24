@@ -33,15 +33,7 @@ function LoginPage({
 
       const { usuario, token } = await loginUsuario(emailLimpo, senha);
 
-      localStorage.setItem(
-        'lockerRioUsuario',
-        JSON.stringify(usuario)
-      );
-
-      localStorage.setItem(
-        'lockerRioToken',
-        token
-      );
+      localStorage.removeItem('lockerRioUsuario'); localStorage.removeItem('lockerRioToken'); sessionStorage.setItem('lockerRioUsuario', JSON.stringify(usuario)); sessionStorage.setItem('lockerRioToken', token);
 
       showToast('Login realizado com sucesso.', 'success');
 
