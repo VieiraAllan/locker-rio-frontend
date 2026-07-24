@@ -244,17 +244,40 @@ function LockersPage({ showToast, usuarioAtual }) {
 
   const resumoFinalizacao = calcularResumoFinalizacao(selectedLocacao);
 
+  const locacaoFinalizacaoInRioTour =
+    selectedLocacao?.in_rio_tour === true ||
+    selectedLocacao?.in_rio_tour === 'true';
+
   const valorExcedenteManualNormalizado = normalizarValorMonetario(valorExcedente);
+
+  const valorFinalManualInRioTour =
+    locacaoFinalizacaoInRioTour &&
+    ajusteManualExcedenteAberto &&
+    podeAjustarManualFinalizacao &&
+    !Number.isNaN(valorExcedenteManualNormalizado)
+      ? valorExcedenteManualNormalizado
+      : null;
+
   const cobrancaAdicionalEfetiva =
     ajusteManualExcedenteAberto && podeAjustarManualFinalizacao
       ? Number.isNaN(valorExcedenteManualNormalizado)
         ? NaN
-        : valorExcedenteManualNormalizado
+        : locacaoFinalizacaoInRioTour
+          ? Math.max(0, valorExcedenteManualNormalizado - resumoFinalizacao.valorTotal)
+          : valorExcedenteManualNormalizado
       : resumoFinalizacao.valorExcedenteSugerido;
 
-  const totalCobrarAgora = Number.isNaN(cobrancaAdicionalEfetiva)
-    ? NaN
-    : resumoFinalizacao.valorPendente + cobrancaAdicionalEfetiva;
+  const totalCobrarAgora =
+    valorFinalManualInRioTour !== null
+      ? Math.max(
+          0,
+          valorFinalManualInRioTour -
+            resumoFinalizacao.valorPagoInicial -
+            resumoFinalizacao.valorPagoFinalAtual
+        )
+      : Number.isNaN(cobrancaAdicionalEfetiva)
+        ? NaN
+        : resumoFinalizacao.valorPendente + cobrancaAdicionalEfetiva;
 
   const totalDisponiveis = lockers.filter(
     locker => locker.status === 'disponivel'
@@ -324,6 +347,37 @@ function LockersPage({ showToast, usuarioAtual }) {
       setValorPagoFinal(formatarValorParaInput(totalInicial));
     }
   }, [modalType, selectedLocacao, selectedAvulsa]);
+
+  useEffect(() => {
+    if (
+      modalType !== 'finalizar' ||
+      !locacaoFinalizacaoInRioTour ||
+      !ajusteManualExcedenteAberto ||
+      !podeAjustarManualFinalizacao ||
+      valorExcedente.trim() === '' ||
+      Number.isNaN(valorExcedenteManualNormalizado)
+    ) {
+      return;
+    }
+
+    const valorReceberAgora = Math.max(
+      0,
+      valorExcedenteManualNormalizado -
+        resumoFinalizacao.valorPagoInicial -
+        resumoFinalizacao.valorPagoFinalAtual
+    );
+
+    setValorPagoFinal(formatarValorParaInput(valorReceberAgora));
+  }, [
+    modalType,
+    locacaoFinalizacaoInRioTour,
+    ajusteManualExcedenteAberto,
+    podeAjustarManualFinalizacao,
+    valorExcedente,
+    valorExcedenteManualNormalizado,
+    resumoFinalizacao.valorPagoInicial,
+    resumoFinalizacao.valorPagoFinalAtual
+  ]);
 
   function resetModal() {
     setSubmitting(false);
@@ -650,6 +704,18 @@ function LockersPage({ showToast, usuarioAtual }) {
         showToast('Cobrança de excedente manual inválida.', 'error');
         return;
       }
+
+      if (
+        locacaoFinalizacaoInRioTour &&
+        valorExcedenteManualNormalizado <
+          resumoFinalizacao.valorPagoInicial + resumoFinalizacao.valorPagoFinalAtual
+      ) {
+        showToast(
+          'O valor final In Rio Tour não pode ser menor que o valor já recebido.',
+          'error'
+        );
+        return;
+      }
     }
 
     if (Number.isNaN(totalCobrarAgora) || totalCobrarAgora < 0) {
@@ -699,6 +765,19 @@ function LockersPage({ showToast, usuarioAtual }) {
         setModalType('finalizar');
         return;
       }
+
+      if (
+        locacaoFinalizacaoInRioTour &&
+        valorExcedenteManualNormalizado <
+          resumoFinalizacao.valorPagoInicial + resumoFinalizacao.valorPagoFinalAtual
+      ) {
+        showToast(
+          'O valor final In Rio Tour não pode ser menor que o valor já recebido.',
+          'error'
+        );
+        setModalType('finalizar');
+        return;
+      }
     }
 
     if (Number.isNaN(totalCobrarAgora) || totalCobrarAgora < 0) {
@@ -739,11 +818,18 @@ function LockersPage({ showToast, usuarioAtual }) {
           ? selectedAvulsa.id
           : await getLocacaoAtiva(selectedLocker.id);
 
+      const valorExcedenteManualPayload =
+        ajusteManualExcedenteAberto && podeAjustarManualFinalizacao
+          ? locacaoFinalizacaoInRioTour
+            ? Math.max(
+                0,
+                valorExcedenteManualNormalizado - resumoFinalizacao.valorTotal
+              )
+            : valorExcedenteManualNormalizado
+          : null;
+
       await finalizarLocacao(locacaoId, {
-        valor_excedente_manual:
-          ajusteManualExcedenteAberto && podeAjustarManualFinalizacao
-            ? valorExcedenteManualNormalizado
-            : null,
+        valor_excedente_manual: valorExcedenteManualPayload,
         valor_pago_final: valorPagoFinalNormalizado
       });
 
@@ -1156,7 +1242,7 @@ function LockersPage({ showToast, usuarioAtual }) {
                 <strong>{formatarMoeda(resumoFinalizacao.valorPagoInicial)}</strong>
               </div>
               <div className="finalizacao-metrica">
-                <span>Cobrança de excedente</span>
+                <span>{locacaoFinalizacaoInRioTour ? 'Ajuste In Rio Tour' : 'Cobrança de excedente'}</span>
                 <strong>
                   {ajusteManualExcedenteAberto && podeAjustarManualFinalizacao
                     ? formatarMoeda(cobrancaAdicionalEfetiva || 0)
@@ -1204,9 +1290,9 @@ function LockersPage({ showToast, usuarioAtual }) {
 
                 {ajusteManualExcedenteAberto && (
                   <div className="finalizacao-campo-principal finalizacao-campo-secundario">
-                    <label>Cobrança de excedente manual</label>
+                    <label>{locacaoFinalizacaoInRioTour ? 'Valor final da locação In Rio Tour' : 'Cobrança de excedente manual'}</label>
                     <input
-                      placeholder="Cobrança de excedente manual"
+                      placeholder={locacaoFinalizacaoInRioTour ? 'Valor final da locação' : 'Cobrança de excedente manual'}
                       value={valorExcedente}
                       onChange={e => setValorExcedente(e.target.value)}
                     />
