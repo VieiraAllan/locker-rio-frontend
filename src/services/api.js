@@ -446,11 +446,19 @@ export async function abrirReciboPdf(locacaoId) {
   }
 
   const blob = await response.blob();
-  const url = URL.createObjectURL(blob);
+  const pdfBlob = new Blob([blob], { type: 'application/pdf' });
 
-  window.open(url, '_blank', 'noopener,noreferrer');
+  const url = URL.createObjectURL(pdfBlob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `recibo-locker-rio-${locacaoId}.pdf`;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 
   setTimeout(() => {
     URL.revokeObjectURL(url);
-  }, 60000);
+  }, 1000);
 }

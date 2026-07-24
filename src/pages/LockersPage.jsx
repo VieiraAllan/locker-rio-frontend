@@ -166,11 +166,22 @@ function LockersPage({ showToast, usuarioAtual }) {
   const exigirTelefoneCliente =
     configuracoes?.operacao?.exigirTelefoneCliente !== false;
 
+  const ehInRioTour = inRioTour && permitirInRioTour;
+
   const valorTotalLocacao =
-    inRioTour && permitirInRioTour
+    ehInRioTour
       ? 0
       : (isAvulsa ? 0 : valorLockerConfigurado * quantidadeLockersSelecionados) +
         valorBagagemAvulsaConfigurado * totalVolumes;
+
+  const valorPagoPreview = normalizarValorMonetario(valorPago);
+
+  const valorTotalLocacaoExibido =
+    ehInRioTour
+      ? Number.isNaN(valorPagoPreview)
+        ? 0
+        : valorPagoPreview
+      : valorTotalLocacao;
 
   function calcularResumoFinalizacao(locacao) {
     if (!locacao) {
@@ -480,7 +491,7 @@ function LockersPage({ showToast, usuarioAtual }) {
       return;
     }
 
-    if (valorNormalizado > valorTotalLocacao) {
+    if (!ehInRioTour && valorNormalizado > valorTotalLocacao) {
       showToast(
         'O valor pago agora não pode ser maior que o valor total da locação.',
         'error'
@@ -901,7 +912,7 @@ function LockersPage({ showToast, usuarioAtual }) {
 
         <div className="valor-locacao-resumo">
           <span>Valor total da locação</span>
-          <strong>{formatarMoeda(valorTotalLocacao)}</strong>
+          <strong>{formatarMoeda(valorTotalLocacaoExibido)}</strong>
         </div>
 
         <input
