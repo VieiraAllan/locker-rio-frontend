@@ -6518,3 +6518,30 @@ body {
     z-index: 70;
   }
 }
+
+.observacao-interna-input {
+  width: 100%;
+  min-height: 82px;
+  resize: vertical;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-main);
+  font: inherit;
+}
+
+.observacao-interna-input::placeholder {
+  color: var(--text-muted);
+}
+
+.locacao-observacao-interna,
+.historico-observacao-interna {
+  grid-column: 1 / -1;
+}
+
+.locacao-observacao-interna strong,
+.historico-observacao-interna strong {
+  white-space: pre-wrap;
+  line-height: 1.4;
+}

@@ -144,7 +144,7 @@ function LocacoesAtivasPage({ showToast }) {
     }
 
     if (!editClienteDocumento.trim()) {
-      showToast('Informe o documento / observação.', 'error');
+      showToast('Informe o documento.', 'error');
       return;
     }
 
@@ -270,6 +270,11 @@ function LocacoesAtivasPage({ showToast }) {
                   </div>
 
                   <div>
+                    <span>Documento</span>
+                    <strong>{locacao.cliente_documento || '-'}</strong>
+                  </div>
+
+                  <div>
                     <span>Entrada</span>
                     <strong>{locacao.hora_entrada || '-'}</strong>
                   </div>
@@ -303,6 +308,13 @@ function LocacoesAtivasPage({ showToast }) {
                     </strong>
                   </div>
                 </div>
+
+                {locacao.observacao && (
+                  <div className="locacao-observacao-interna">
+                    <span>Observação interna</span>
+                    <strong>{locacao.observacao}</strong>
+                  </div>
+                )}
 
                 <div className="locacao-whatsapp-area">
                   <div className="locacao-whatsapp-header">
@@ -427,10 +439,10 @@ function LocacoesAtivasPage({ showToast }) {
           </div>
 
           <div className="locacao-edicao-campo">
-            <label htmlFor="edit-cliente-documento">Documento / Observação</label>
+            <label htmlFor="edit-cliente-documento">Documento</label>
             <input
               id="edit-cliente-documento"
-              placeholder="Digite o documento ou observação"
+              placeholder="Digite o documento"
               value={editClienteDocumento}
               onChange={e => setEditClienteDocumento(e.target.value)}
             />

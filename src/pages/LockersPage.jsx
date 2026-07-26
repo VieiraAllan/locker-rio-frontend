@@ -28,6 +28,7 @@ function LockersPage({ showToast, usuarioAtual }) {
   const [clienteNome, setClienteNome] = useState('');
   const [clienteTelefone, setClienteTelefone] = useState('');
   const [clienteDocumento, setClienteDocumento] = useState('');
+  const [observacao, setObservacao] = useState('');
   const [valorPago, setValorPago] = useState('');
   const [lacres, setLacres] = useState('');
   const [inRioTour, setInRioTour] = useState(false);
@@ -387,6 +388,7 @@ function LockersPage({ showToast, usuarioAtual }) {
     setClienteNome('');
     setClienteTelefone('');
     setClienteDocumento('');
+    setObservacao('');
     setValorPago('');
     setLacres('');
     setInRioTour(false);
@@ -583,6 +585,7 @@ function LockersPage({ showToast, usuarioAtual }) {
         cliente_nome: clienteNome,
         cliente_telefone: clienteTelefone,
         cliente_documento: clienteDocumento,
+        observacao,
         lacres,
         valor_pago_inicial: valorNormalizado,
         usuario_abertura_id: usuarioAtual.id,
@@ -991,9 +994,17 @@ function LockersPage({ showToast, usuarioAtual }) {
         />
 
         <input
-          placeholder="Documento / Observação"
+          placeholder="Documento"
           value={clienteDocumento}
           onChange={e => setClienteDocumento(e.target.value)}
+        />
+
+        <textarea
+          className="observacao-interna-input"
+          placeholder="Observação interna — não aparece no recibo"
+          value={observacao}
+          onChange={e => setObservacao(e.target.value)}
+          rows={3}
         />
 
         <div className="valor-locacao-resumo">

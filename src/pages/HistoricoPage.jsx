@@ -165,9 +165,16 @@ async function handleAbrirRecibo(locacaoId) {
                 </div>
 
                 <div>
-                  <span>Documento / Observação</span>
+                  <span>Documento</span>
                   <strong>{locacao.cliente_documento || '-'}</strong>
                 </div>
+
+                {locacao.observacao && (
+                  <div className="historico-observacao-interna">
+                    <span>Observação interna</span>
+                    <strong>{locacao.observacao}</strong>
+                  </div>
+                )}
 
                 <div>
                     <span>Aberta por</span>
