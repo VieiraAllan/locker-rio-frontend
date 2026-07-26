@@ -310,8 +310,8 @@ function LocacoesAtivasPage({ showToast }) {
                 </div>
 
                 {locacao.observacao && (
-                  <div className="locacao-observacao-interna">
-                    <span>Observação interna</span>
+                  <div className="locacao-observacao-interna observacao-interna-card">
+                    <span>Observação interna:</span>
                     <strong>{locacao.observacao}</strong>
                   </div>
                 )}

@@ -6355,9 +6355,7 @@ body.dark .login-field input:focus {
 
 /* ======================================================
    VERSAO 2 — SOMENTE A BORDA ANIMADA RODANDO
-   COLE ESTE BLOCO NO FINAL DO index.css
 ====================================================== */
-
 .login-card.login-card-animated {
   position: relative;
   overflow: hidden;
@@ -6435,7 +6433,6 @@ body.dark .login-card-animated .login-card-blob {
 /* ======================================================
    FIX DE LAYOUT - TOPO FIXO / CONTEUDO COM SCROLL
 ====================================================== */
-
 html,
 body,
 #root {
@@ -6544,4 +6541,43 @@ body {
 .historico-observacao-interna strong {
   white-space: pre-wrap;
   line-height: 1.4;
+}
+
+/* ======================================================
+   OBSERVAÇÃO INTERNA - ESPAÇAMENTO E LEITURA
+====================================================== */
+.locacao-observacao-interna,
+.historico-observacao-interna,
+.observacao-interna-card {
+  grid-column: 1 / -1;
+  margin: 14px 0 18px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.locacao-observacao-interna span,
+.historico-observacao-interna span,
+.observacao-interna-card span {
+  display: block;
+  color: var(--text-muted, #aeb4bd);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.locacao-observacao-interna strong,
+.historico-observacao-interna strong,
+.observacao-interna-card strong {
+  display: block;
+  color: var(--text-main, #ffffff);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
