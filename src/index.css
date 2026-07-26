@@ -6581,3 +6581,76 @@ body {
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+/* ======================================================
+   OBSERVAÇÃO INTERNA NA FINALIZAÇÃO
+====================================================== */
+.finalizacao-observacao-interna,
+.observacao-interna-card {
+  grid-column: 1 / -1;
+  margin: 10px 0 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.finalizacao-observacao-interna span,
+.observacao-interna-card span {
+  display: block;
+  color: var(--text-muted, #aeb4bd);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.finalizacao-observacao-interna strong,
+.observacao-interna-card strong {
+  display: block;
+  color: var(--text-main, #ffffff);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ======================================================
+   TOPBAR NO MODO CLARO
+   Corrige o topo escuro quando o dark mode está desligado.
+====================================================== */
+body:not(.dark) .app-topbar {
+  background: #fff1a8 !important;
+  color: #111827 !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+body:not(.dark) .topbar-title,
+body:not(.dark) .topbar-title h1,
+body:not(.dark) .topbar-title h2,
+body:not(.dark) .topbar-title span,
+body:not(.dark) .topbar-title strong {
+  color: #111827 !important;
+}
+
+body:not(.dark) .topbar-user,
+body:not(.dark) .logout-button,
+body:not(.dark) .darkmode-toggle,
+body:not(.dark) .theme-switch {
+  color: #111827 !important;
+}
+
+body:not(.dark) .topbar-user,
+body:not(.dark) .logout-button {
+  background: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.14) !important;
+}
+
+body.dark .app-topbar {
+  background: #15191f !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}

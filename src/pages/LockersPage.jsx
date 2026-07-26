@@ -1218,6 +1218,12 @@ function LockersPage({ showToast, usuarioAtual }) {
                 <span>Lacres</span>
                 <strong>{selectedLocacao?.lacres || '-'}</strong>
               </div>
+              {selectedLocacao?.observacao && (
+                <div className="finalizacao-observacao-interna observacao-interna-card">
+                  <span>Observação interna:</span>
+                  <strong>{selectedLocacao.observacao}</strong>
+                </div>
+              )}
               <div>
                 <span>Volumes extras</span>
                 <strong>{selectedLocacao?.total_volumes || 0}</strong>
