@@ -1,4 +1,4 @@
-const API_URL = String(import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+const API_URL = String(import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
 const TOKEN_KEY = 'lockerRioToken';
 const USUARIO_KEY = 'lockerRioUsuario';
 
@@ -77,6 +77,42 @@ export async function atualizarStatusLocker(lockerId, status) {
   }
 
   return data.data;
+}
+
+export async function criarLocker(payload) {
+  const response = await authFetch(`${API_URL}/lockers`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders()
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Erro ao criar locker');
+  }
+
+  return data.data;
+}
+
+export async function excluirLocker(lockerId) {
+  const response = await authFetch(`${API_URL}/lockers/${lockerId}`, {
+    method: 'DELETE',
+    headers: {
+      ...getAuthHeaders()
+    }
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Erro ao excluir locker');
+  }
+
+  return data;
 }
 
 /* =========================
