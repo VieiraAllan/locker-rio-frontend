@@ -3,8 +3,12 @@ import { useEffect, useState } from 'react';
 import {
   getConfiguracoes,
   salvarConfiguracoes as salvarConfiguracoesApi,
-  alterarSenhaUsuario
+  alterarSenhaUsuario,
+  getLockers,
+  criarLocker,
+  excluirLocker
 } from '../services/api';
+import Modal from '../components/Modal';
 
 function formatarValorConfiguracao(valor) {
   const numero = Number(valor || 0);
@@ -18,6 +22,15 @@ function formatarValorConfiguracao(valor) {
 function ConfiguracoesPage({ showToast, usuarioAtual }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const [lockers, setLockers] = useState([]);
+  const [carregandoLockers, setCarregandoLockers] = useState(false);
+  const [numeroNovoLocker, setNumeroNovoLocker] = useState('');
+  const [salvandoLocker, setSalvandoLocker] = useState(false);
+
+  const [lockerParaExcluir, setLockerParaExcluir] = useState(null);
+  const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
+  const [excluindoLocker, setExcluindoLocker] = useState(false);
 
   const [senhaNova, setSenhaNova] = useState('');
   const [senhaConfirmacao, setSenhaConfirmacao] = useState('');
@@ -95,8 +108,106 @@ function ConfiguracoesPage({ showToast, usuarioAtual }) {
     }
   }
 
+  const perfilNormalizado = String(usuarioAtual?.perfil || '')
+    .trim()
+    .toLowerCase();
+
+  const podeCriarLocker = [
+    'admin',
+    'administrador',
+    'gerente'
+  ].some(perfil => perfilNormalizado.includes(perfil));
+
+  async function carregarLockers() {
+    try {
+      setCarregandoLockers(true);
+      const lista = await getLockers();
+      if (Array.isArray(lista)) {
+        lista.sort((a, b) => {
+          const numA = Number(a.numero);
+          const numB = Number(b.numero);
+          if (!Number.isNaN(numA) && !Number.isNaN(numB)) {
+            return numA - numB;
+          }
+          return String(a.numero).localeCompare(String(b.numero));
+        });
+        setLockers(lista);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar lockers nas configurações:', err);
+    } finally {
+      setCarregandoLockers(false);
+    }
+  }
+
+  async function handleCriarLocker(e) {
+    if (e) e.preventDefault();
+
+    if (!podeCriarLocker) {
+      showToast('Apenas administradores e gerentes podem cadastrar novos lockers.', 'error');
+      return;
+    }
+
+    const numeroLimpo = String(numeroNovoLocker || '').trim();
+
+    if (!numeroLimpo) {
+      showToast('Informe o número do novo locker.', 'error');
+      return;
+    }
+
+    try {
+      setSalvandoLocker(true);
+      const novoLocker = await criarLocker({ numero: numeroLimpo, status: 'disponivel' });
+      showToast(`Locker "${novoLocker.numero}" cadastrado com sucesso!`, 'success');
+      setNumeroNovoLocker('');
+      await carregarLockers();
+    } catch (err) {
+      showToast(err.message || 'Erro ao cadastrar novo locker.', 'error');
+    } finally {
+      setSalvandoLocker(false);
+    }
+  }
+
+  function abrirModalExclusao(locker) {
+    if (!podeCriarLocker) {
+      showToast('Apenas administradores e gerentes podem excluir lockers.', 'error');
+      return;
+    }
+
+    if (locker.status === 'ocupado') {
+      showToast(`O Locker #${locker.numero} está ocupado e não pode ser excluído.`, 'error');
+      return;
+    }
+
+    setLockerParaExcluir(locker);
+    setModalExcluirAberto(true);
+  }
+
+  function fecharModalExclusao() {
+    if (excluindoLocker) return;
+    setModalExcluirAberto(false);
+    setLockerParaExcluir(null);
+  }
+
+  async function confirmarExclusaoLocker() {
+    if (!lockerParaExcluir) return;
+
+    try {
+      setExcluindoLocker(true);
+      await excluirLocker(lockerParaExcluir.id);
+      showToast(`Locker #${lockerParaExcluir.numero} excluído com sucesso!`, 'success');
+      fecharModalExclusao();
+      await carregarLockers();
+    } catch (err) {
+      showToast(err.message || 'Erro ao excluir locker.', 'error');
+    } finally {
+      setExcluindoLocker(false);
+    }
+  }
+
   useEffect(() => {
     carregarConfiguracoes();
+    carregarLockers();
   }, []);
 
   function atualizarEstabelecimento(campo, valor) {
@@ -433,7 +544,104 @@ function ConfiguracoesPage({ showToast, usuarioAtual }) {
           </label>
         </section>
 
-            <section className="configuracao-card">
+        {podeCriarLocker && (
+          <section className="configuracao-card">
+            <div className="configuracao-card-header">
+              <h3>Cadastrar Novo Locker</h3>
+              <span>Adicione novos armários ao sistema</span>
+            </div>
+
+            <form onSubmit={handleCriarLocker}>
+              <label className="configuracao-field">
+                <span>Número do locker</span>
+                <input
+                  type="text"
+                  value={numeroNovoLocker}
+                  onChange={e => setNumeroNovoLocker(e.target.value)}
+                  placeholder="Ex: 21, 22 ou 10A"
+                  disabled={salvandoLocker}
+                />
+                <small>
+                  O novo locker iniciará com status &quot;Disponível&quot;.
+                </small>
+              </label>
+
+              <div className="configuracao-card-actions">
+                <button
+                  type="submit"
+                  disabled={salvandoLocker || !numeroNovoLocker.trim()}
+                >
+                  {salvandoLocker ? 'Cadastrando...' : '+ Cadastrar Locker'}
+                </button>
+              </div>
+            </form>
+
+            <div style={{ marginTop: '16px', borderTop: '1px solid var(--input-border)', paddingTop: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <strong style={{ fontSize: '13px' }}>
+                  Lockers no sistema ({lockers.length})
+                </strong>
+                {carregandoLockers && (
+                  <span style={{ fontSize: '12px', opacity: 0.7 }}>Atualizando...</span>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', maxHeight: '160px', overflowY: 'auto' }}>
+                {lockers.length === 0 ? (
+                  <span style={{ fontSize: '13px', opacity: 0.6 }}>Nenhum locker encontrado.</span>
+                ) : (
+                  lockers.map(l => (
+                    <span
+                      key={l.id}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        border: '1px solid var(--input-border)',
+                        background: 'var(--card-bg)'
+                      }}
+                      title={`Locker #${l.numero} (${l.status})`}
+                    >
+                      <span>#{l.numero}</span>
+                      <span style={{ fontSize: '10px', opacity: 0.65, textTransform: 'capitalize' }}>
+                        ({l.status})
+                      </span>
+                      {podeCriarLocker && l.status !== 'ocupado' && (
+                        <button
+                          type="button"
+                          onClick={() => abrirModalExclusao(l)}
+                          disabled={excluindoLocker}
+                          title={`Excluir Locker #${l.numero}`}
+                          aria-label={`Excluir Locker #${l.numero}`}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            padding: '0 2px',
+                            marginLeft: '2px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            color: '#ef4444',
+                            lineHeight: 1,
+                            display: 'inline-flex',
+                            alignItems: 'center'
+                          }}
+                        >
+                          🗑️
+                        </button>
+                      )}
+                    </span>
+                  ))
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section className="configuracao-card">
   <div className="configuracao-card-header">
     <h3>Minha senha</h3>
     <span>Alteração de senha do usuário logado</span>
@@ -501,6 +709,58 @@ function ConfiguracoesPage({ showToast, usuarioAtual }) {
 </section>
 
       </div>
+
+      <Modal
+        isOpen={modalExcluirAberto}
+        title="Confirmar exclusão de locker"
+        onClose={fecharModalExclusao}
+        confirmDisabled={excluindoLocker}
+      >
+        <div style={{ padding: '8px 0' }}>
+          <p style={{ fontSize: '15px', lineHeight: '1.5', margin: '0 0 12px' }}>
+            Tem certeza de que deseja excluir o <strong>Locker #{lockerParaExcluir?.numero}</strong>?
+          </p>
+
+          <p style={{ fontSize: '13px', opacity: 0.75, margin: '0 0 24px', lineHeight: '1.4' }}>
+            Esta ação removerá o armário do sistema. Armários com histórico de locações não podem ser excluídos para preservar os relatórios e registros.
+          </p>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <button
+              type="button"
+              onClick={fecharModalExclusao}
+              disabled={excluindoLocker}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid var(--input-border)',
+                background: 'transparent',
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              onClick={confirmarExclusaoLocker}
+              disabled={excluindoLocker}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: 'none',
+                background: '#ef4444',
+                color: '#ffffff',
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+            >
+              {excluindoLocker ? 'Excluindo...' : 'Excluir locker'}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
