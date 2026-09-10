@@ -119,9 +119,12 @@ export async function excluirLocker(lockerId) {
    CRIAR LOCAÇÃO
 ========================= */
 export async function criarLocacao(payload) {
-  const response = await fetch(`${API_URL}/locacoes`, {
+  const response = await authFetch(`${API_URL}/locacoes`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders()
+    },
     body: JSON.stringify(payload)
   });
 
@@ -266,7 +269,11 @@ export function gerarLinkWhatsAppFinalizacao(
    BAGAGENS AVULSAS ATIVAS
 ========================= */
 export async function getAvulsasAtivas() {
-  const response = await fetch(`${API_URL}/locacoes/avulsas-ativas`);
+  const response = await authFetch(`${API_URL}/locacoes/avulsas-ativas`, {
+    headers: {
+      ...getAuthHeaders()
+    }
+  });
   const data = await response.json();
 
   if (!response.ok) {
@@ -280,7 +287,11 @@ export async function getAvulsasAtivas() {
    LOCAÇÕES ATIVAS
 ========================= */
 export async function getLocacoesAtivas() {
-  const response = await fetch(`${API_URL}/locacoes/ativas`);
+  const response = await authFetch(`${API_URL}/locacoes/ativas`, {
+    headers: {
+      ...getAuthHeaders()
+    }
+  });
   const data = await response.json();
 
   if (!response.ok) {
@@ -294,7 +305,11 @@ export async function getLocacoesAtivas() {
    HISTÓRICO DE LOCAÇÕES
 ========================= */
 export async function getHistoricoLocacoes() {
-  const response = await fetch(`${API_URL}/locacoes/historico`);
+  const response = await authFetch(`${API_URL}/locacoes/historico`, {
+    headers: {
+      ...getAuthHeaders()
+    }
+  });
   const data = await response.json();
 
   if (!response.ok) {
