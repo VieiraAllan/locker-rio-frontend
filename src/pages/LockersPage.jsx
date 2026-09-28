@@ -19,6 +19,7 @@ function LockersPage({ showToast, usuarioAtual }) {
   const [configuracoes, setConfiguracoes] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedLocker, setSelectedLocker] = useState(null);
+  const [lockersAdicionais, setLockersAdicionais] = useState([]);
   const [selectedAvulsa, setSelectedAvulsa] = useState(null);
   const [selectedLocacao, setSelectedLocacao] = useState(null);
   const [locacoesAtivasDetalhes, setLocacoesAtivasDetalhes] = useState([]);
@@ -144,7 +145,25 @@ function LockersPage({ showToast, usuarioAtual }) {
   }
 
   const quantidadeLockersSelecionados =
-    isAvulsa || !selectedLocker ? 0 : 1;
+    isAvulsa || !selectedLocker ? 0 : 1 + lockersAdicionais.length;
+
+  const lockersDisponiveisParaAdicionar = lockers.filter(
+    locker =>
+      locker.status === 'disponivel' &&
+      locker.id !== selectedLocker?.id
+  );
+
+  function toggleLockerAdicional(locker) {
+    setLockersAdicionais(prev => {
+      const jaSelecionado = prev.some(l => l.id === locker.id);
+
+      if (jaSelecionado) {
+        return prev.filter(l => l.id !== locker.id);
+      }
+
+      return [...prev, locker];
+    });
+  }
 
   const valorLockerConfigurado = Number(
     configuracoes?.operacao?.valorLocker ?? 30
@@ -384,6 +403,7 @@ function LockersPage({ showToast, usuarioAtual }) {
     setSubmitting(false);
     setIsAvulsa(false);
     setSelectedAvulsa(null);
+    setLockersAdicionais([]);
     setSelectedLocacao(null);
     setClienteNome('');
     setClienteTelefone('');
@@ -567,14 +587,20 @@ function LockersPage({ showToast, usuarioAtual }) {
       return;
     }
 
-    const lockerIdsPayload = isAvulsa ? [] : [selectedLocker.id];
+    const lockersDaLocacao = isAvulsa
+      ? []
+      : [selectedLocker, ...lockersAdicionais];
+
+    const lockerIdsPayload = lockersDaLocacao.map(l => l.id);
 
     try {
       setSubmitting(true);
 
       const referenciaAbertura = isAvulsa
         ? 'Bagagem avulsa'
-        : `Armário ${selectedLocker?.numero}`;
+        : lockersDaLocacao.length > 1
+          ? `Armários ${lockersDaLocacao.map(l => l.numero).join(', ')}`
+          : `Armário ${selectedLocker?.numero}`;
       const telefoneClienteAtual = clienteTelefone.trim();
       const nomeClienteAtual = clienteNome.trim();
 
@@ -600,6 +626,7 @@ function LockersPage({ showToast, usuarioAtual }) {
 
       if (locacaoCriadaId && telefoneClienteAtual) {
         setSelectedLocker(null);
+        setLockersAdicionais([]);
         setSelectedAvulsa(null);
         setSelectedLocacao(null);
         setIsAvulsa(false);
@@ -969,7 +996,11 @@ function LockersPage({ showToast, usuarioAtual }) {
         title={
           isAvulsa
             ? 'Nova locação – Bagagem avulsa'
-            : `Nova locação - Armário ${selectedLocker?.numero}`
+            : lockersAdicionais.length > 0
+              ? `Nova locação - Armários ${[selectedLocker, ...lockersAdicionais]
+                  .map(l => l.numero)
+                  .join(', ')}`
+              : `Nova locação - Armário ${selectedLocker?.numero}`
         }
         onClose={closeModal}
         onConfirm={confirmarNovaLocacao}
@@ -1006,6 +1037,28 @@ function LockersPage({ showToast, usuarioAtual }) {
           onChange={e => setObservacao(e.target.value)}
           rows={3}
         />
+
+        {!isAvulsa && lockersDisponiveisParaAdicionar.length > 0 && (
+          <div className="locacao-cadeia-secao">
+            <span className="locacao-cadeia-label">+ Adicionar outros armários a esta locação</span>
+            <div className="locacao-cadeia-chips">
+              {lockersDisponiveisParaAdicionar.map(locker => {
+                const marcado = lockersAdicionais.some(l => l.id === locker.id);
+
+                return (
+                  <button
+                    type="button"
+                    key={locker.id}
+                    className={`locacao-cadeia-chip ${marcado ? 'marcado' : ''}`}
+                    onClick={() => toggleLockerAdicional(locker)}
+                  >
+                    {locker.numero}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="valor-locacao-resumo">
           <span>{ehInRioTour ? 'Valor definido para cliente In Rio Tour' : 'Valor total da locação'}</span>

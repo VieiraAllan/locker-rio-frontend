@@ -276,6 +276,54 @@ h1 {
   color: #333;
 }
 
+/* Locação em cadeia — adicionar outros armários dentro do modal de nova locação */
+.locacao-cadeia-secao {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.locacao-cadeia-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.locacao-cadeia-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* !important necessário: sobrescreve as regras genéricas
+   .modal-body button:first-of-type / :last-of-type / button + button,
+   que do contrário pintam os chips como botão primário/secundário do modal. */
+.modal-body .locacao-cadeia-chip {
+  width: auto !important;
+  margin: 0 !important;
+  padding: 6px 14px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--input-border) !important;
+  background: var(--input-bg) !important;
+  color: var(--text-main) !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  cursor: pointer;
+}
+
+.modal-body .locacao-cadeia-chip:hover {
+  border-color: var(--accent) !important;
+}
+
+.modal-body .locacao-cadeia-chip.marcado {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #ffffff !important;
+}
+
 /* ======================================================
    POP-UP — BOTÕES
 ====================================================== */
