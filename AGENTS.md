@@ -122,6 +122,7 @@ Diretrizes:
 - Cliente regular não pode pagar na abertura valor maior que o total contratado.
 - Cliente In Rio Tour possui valor variável, inclusive zero.
 - Para In Rio Tour, o valor final pode ser ajustado na finalização conforme a regra vigente.
+- Uma locação pode conter múltiplos lockers simultâneos (locação em cadeia) para o mesmo cliente; todos os lockers da locação devem ser marcados como `ocupado`.
 - Bagagem avulsa continua separada do fluxo de locker.
 - Bagagens extras integram cálculo, recibo e mensagem conforme as regras existentes.
 - Observação interna deve aparecer somente no sistema.

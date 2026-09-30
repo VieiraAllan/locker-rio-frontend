@@ -13,7 +13,7 @@ O **Locker Rio** é um sistema para operação de lockers, guarda-volumes e baga
 O frontend permite que a equipe operacional:
 
 - visualize o painel de lockers;
-- crie locações com locker;
+- crie locações com locker, incluindo locação em cadeia (múltiplos armários em uma única locação, para o mesmo cliente);
 - crie locações de bagagem avulsa;
 - registre bagagens extras;
 - finalize locações;
@@ -34,7 +34,7 @@ O frontend permite que a equipe operacional:
 - **JavaScript**
 - **CSS**
 - **Fetch API**
-- **LocalStorage**
+- **sessionStorage** (sessão de autenticação)
 - **API REST do Locker Rio Backend**
 
 ---
@@ -47,6 +47,8 @@ locker-rio-frontend/
 │
 ├── src/
 │   ├── components/
+│   │   ├── LockerCard.jsx
+│   │   ├── Modal.jsx
 │   │   └── Toast.jsx
 │   │
 │   ├── config/
@@ -143,6 +145,12 @@ gerenciar atendentes;
 gerenciar gerentes;
 gerenciar administradores;
 alterar configurações do sistema.
+
+---
+
+## 🤖 Diretrizes para agentes de IA
+
+Consulte [`AGENTS.md`](./AGENTS.md) antes de propor ou aplicar alterações neste repositório.
 
 ---
 
