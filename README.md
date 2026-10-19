@@ -2,7 +2,7 @@
 
 Frontend do sistema **Locker Rio**, desenvolvido em **React + Vite**, responsável pela interface web de gerenciamento de lockers, locações, bagagens extras, histórico, relatórios, configurações, usuários e autenticação.
 
-Este projeto consome a API do repositório **locker-rio-backend** e oferece uma experiência visual moderna, responsiva e preparada para operação diária de guarda-volumes.
+Este projeto consome a API do **Locker Rio Backend** (repositório privado; acesso ao código sob solicitação) e oferece uma experiência visual moderna, responsiva e preparada para operação diária de guarda-volumes.
 
 ---
 
@@ -162,5 +162,5 @@ Projeto desenvolvido por Állan R. Vieira.
 
 ## 📄 Licença
 
-Projeto privado em desenvolvimento.
-Todos os direitos reservados.
+Código disponível publicamente apenas para consulta e avaliação (portfólio).
+Todos os direitos reservados: não é permitido copiar, adaptar, redistribuir ou usar sem autorização por escrito. Veja o arquivo [LICENSE](./LICENSE).
