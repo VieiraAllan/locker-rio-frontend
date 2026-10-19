@@ -20,7 +20,8 @@ Toda alteração deve preservar o comportamento existente, priorizar segurança,
 - Evitar duplicação. Reutilizar componentes, helpers e estilos existentes.
 - Não criar arquivos com sufixos como `.final`, `.corrigido`, `.v2` ou equivalentes dentro do repositório.
 - Alterar o arquivo oficial e manter o histórico pelo Git.
-- Trabalhar em branch de feature ou correção. Não alterar `main` diretamente.
+- Trabalhar em branch de feature ou correção. Código nunca vai direto para a `main`: alterações de código sempre passam por branch e pull request.
+- Exceção: alterações exclusivamente de documentação (README, AGENTS.md, LICENSE e similares) podem ir direto para a `main`, mas somente quando o autor autorizar expressamente no chat naquela solicitação. Sem autorização expressa, usar branch e pull request também para documentação.
 
 ## 3. Stack e convenções
 
