@@ -388,7 +388,7 @@ h1 {
   }
 
   .lockers-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
   }
 
@@ -405,13 +405,13 @@ h1 {
 
 @media (min-width: 481px) and (max-width: 900px) {
   .lockers-grid {
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 1200px) {
   .lockers-grid {
-    grid-template-columns: repeat(10, 1fr);
+    grid-template-columns: repeat(10, minmax(0, 1fr));
   }
 }
 
