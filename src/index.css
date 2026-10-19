@@ -270,10 +270,23 @@ h1 {
   display: flex;
   align-items: center;
   gap: 8px;
-  width: 30%;
+  width: 100%;
   margin: 10px 0 14px;
   font-size: 14px;
   color: #333;
+}
+
+.valor-locacao-resumo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 4px 0 12px;
+  color: inherit;
+}
+
+.valor-locacao-resumo strong {
+  font-size: 18px;
 }
 
 /* Locação em cadeia — adicionar outros armários dentro do modal de nova locação */
