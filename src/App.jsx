@@ -192,7 +192,9 @@ function App() {
     showToast('Sessão encerrada com sucesso.', 'success');
   }
 
-  if (window.location.pathname === '/check-in') {
+  const caminhoAtual = window.location.pathname.replace(/\/+$/, '') || '/';
+
+  if (caminhoAtual === '/check-in') {
     return <CheckInPage />;
   }
 
