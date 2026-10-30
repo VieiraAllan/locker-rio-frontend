@@ -10,7 +10,9 @@ import {
   getAvulsasAtivas,
   getConfiguracoes,
   getLocacoesAtivas,
-  atualizarStatusLocker
+  atualizarStatusLocker,
+  getPreCadastrosPendentes,
+  cancelarPreCadastro
 } from '../services/api';
 
 function LockersPage({ showToast, usuarioAtual }) {
@@ -52,6 +54,10 @@ function LockersPage({ showToast, usuarioAtual }) {
   const [ajusteManualExcedenteAberto, setAjusteManualExcedenteAberto] = useState(false);
   const [lockerManutencaoAlvo, setLockerManutencaoAlvo] = useState(null);
   const [salvandoManutencao, setSalvandoManutencao] = useState(false);
+  const [preCadastrosPendentes, setPreCadastrosPendentes] = useState([]);
+  const [preCadastroSelecionado, setPreCadastroSelecionado] = useState(null);
+  const [preCadastroAtivoId, setPreCadastroAtivoId] = useState(null);
+  const [cancelandoPreCadastroId, setCancelandoPreCadastroId] = useState(null);
 
   const nomeRef = useRef(null);
   const telefoneRef = useRef(null);
@@ -339,7 +345,18 @@ function LockersPage({ showToast, usuarioAtual }) {
       setConfiguracoes(null);
     }
 
+    await carregarPreCadastrosPendentes();
+
     setLoading(false);
+  }
+
+  async function carregarPreCadastrosPendentes() {
+    try {
+      const dados = await getPreCadastrosPendentes();
+      setPreCadastrosPendentes(dados);
+    } catch {
+      setPreCadastrosPendentes([]);
+    }
   }
 
   useEffect(() => {
@@ -405,6 +422,7 @@ function LockersPage({ showToast, usuarioAtual }) {
     setSelectedAvulsa(null);
     setLockersAdicionais([]);
     setSelectedLocacao(null);
+    setPreCadastroAtivoId(null);
     setClienteNome('');
     setClienteTelefone('');
     setClienteDocumento('');
@@ -441,6 +459,17 @@ function LockersPage({ showToast, usuarioAtual }) {
     if (locker.status === 'disponivel') {
       setSelectedLocacao(null);
       setModalType('nova');
+
+      if (preCadastroSelecionado) {
+        setClienteNome(preCadastroSelecionado.cliente_nome || '');
+        setClienteTelefone(preCadastroSelecionado.cliente_telefone || '');
+        setClienteDocumento(preCadastroSelecionado.cliente_documento || '');
+        setObservacao(preCadastroSelecionado.observacao_cliente || '');
+        setIdiomaMensagemAbertura(preCadastroSelecionado.idioma || '');
+        setPreCadastroAtivoId(preCadastroSelecionado.id);
+        setPreCadastroSelecionado(null);
+      }
+
       return;
     }
 
@@ -524,6 +553,38 @@ function LockersPage({ showToast, usuarioAtual }) {
     setSalvandoManutencao(false);
     setModalType(null);
     resetModal();
+  }
+
+  function handleAtenderPreCadastro(preCadastro) {
+    setPreCadastroSelecionado(preCadastro);
+    showToast(
+      `Selecione o(s) locker(s) disponível(is) para ${preCadastro.cliente_nome}.`,
+      'success'
+    );
+  }
+
+  function cancelarSelecaoPreCadastro() {
+    setPreCadastroSelecionado(null);
+  }
+
+  async function handleCancelarPreCadastro(preCadastro) {
+    if (cancelandoPreCadastroId) return;
+
+    try {
+      setCancelandoPreCadastroId(preCadastro.id);
+      await cancelarPreCadastro(preCadastro.id);
+
+      if (preCadastroSelecionado?.id === preCadastro.id) {
+        setPreCadastroSelecionado(null);
+      }
+
+      showToast(`Check-in de ${preCadastro.cliente_nome} cancelado.`, 'success');
+      await carregarPreCadastrosPendentes();
+    } catch (err) {
+      showToast(err.message || 'Erro ao cancelar check-in.', 'error');
+    } finally {
+      setCancelandoPreCadastroId(null);
+    }
   }
 
   function adicionarBagagem() {
@@ -616,7 +677,8 @@ function LockersPage({ showToast, usuarioAtual }) {
         valor_pago_inicial: valorNormalizado,
         usuario_abertura_id: usuarioAtual.id,
         usuario_abertura_nome: usuarioAtual.nome,
-        usuario_abertura_perfil: usuarioAtual.perfil
+        usuario_abertura_perfil: usuarioAtual.perfil,
+        pre_cadastro_id: preCadastroAtivoId
       });
 
       showToast('Locação criada com sucesso.', 'success');
@@ -901,6 +963,56 @@ function LockersPage({ showToast, usuarioAtual }) {
     <div>
       <div className="painel-container">
         <h2>Painel de Lockers</h2>
+
+        {preCadastrosPendentes.length > 0 && (
+          <div className="pre-cadastros-aguardando">
+            <div className="pre-cadastros-header">
+              <span>Check-ins aguardando</span>
+              <span className="pre-cadastros-badge">{preCadastrosPendentes.length}</span>
+            </div>
+
+            {preCadastrosPendentes.map(preCadastro => (
+              <div key={preCadastro.id} className="pre-cadastro-card">
+                <div className="pre-cadastro-topo">
+                  <span className="pre-cadastro-codigo">{preCadastro.codigo_atendimento}</span>
+                  <span className="pre-cadastro-idioma">{preCadastro.idioma.toUpperCase()}</span>
+                </div>
+                <strong className="pre-cadastro-nome">{preCadastro.cliente_nome}</strong>
+                <span className="pre-cadastro-meta">
+                  {preCadastro.quantidade_volumes} volume{preCadastro.quantidade_volumes === 1 ? '' : 's'}
+                  {preCadastro.observacao_cliente ? ` · ${preCadastro.observacao_cliente}` : ''}
+                </span>
+                <div className="pre-cadastro-acoes">
+                  <button
+                    type="button"
+                    className="pre-cadastro-atender"
+                    onClick={() => handleAtenderPreCadastro(preCadastro)}
+                    disabled={cancelandoPreCadastroId === preCadastro.id}
+                  >
+                    Atender
+                  </button>
+                  <button
+                    type="button"
+                    className="pre-cadastro-cancelar"
+                    onClick={() => handleCancelarPreCadastro(preCadastro)}
+                    disabled={cancelandoPreCadastroId === preCadastro.id}
+                  >
+                    {cancelandoPreCadastroId === preCadastro.id ? 'Cancelando...' : 'Cancelar'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {preCadastroSelecionado && (
+          <div className="pre-cadastro-selecao-banner">
+            <span>
+              Selecionando locker(s) para <strong>{preCadastroSelecionado.cliente_nome}</strong> — clique em um armário disponível na grade abaixo.
+            </span>
+            <button type="button" onClick={cancelarSelecaoPreCadastro}>Cancelar seleção</button>
+          </div>
+        )}
 
         <div className="painel-resumo">
           <div className="resumo-item resumo-disponivel">

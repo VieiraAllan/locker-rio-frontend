@@ -462,6 +462,60 @@ export async function excluirUsuario(usuarioId) {
 }
 
 /* =========================
+   CHECK-IN ANTECIPADO (PRÉ-CADASTRO)
+========================= */
+export async function criarPreCadastro(payload) {
+  const response = await fetch(`${API_URL}/pre-cadastros`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Erro ao registrar check-in');
+  }
+
+  return data.data;
+}
+
+export async function getPreCadastrosPendentes() {
+  const response = await authFetch(`${API_URL}/pre-cadastros/pendentes`, {
+    headers: {
+      ...getAuthHeaders()
+    }
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Erro ao buscar check-ins aguardando');
+  }
+
+  return data.data;
+}
+
+export async function cancelarPreCadastro(preCadastroId) {
+  const response = await authFetch(`${API_URL}/pre-cadastros/${preCadastroId}/cancelar`, {
+    method: 'PATCH',
+    headers: {
+      ...getAuthHeaders()
+    }
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Erro ao cancelar check-in');
+  }
+
+  return data;
+}
+
+/* =========================
    AUTENTICAÇÃO
 ========================= */
 export async function loginUsuario(email, senha) {
