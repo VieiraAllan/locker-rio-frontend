@@ -6872,17 +6872,17 @@ body.dark .app-topbar {
    CHECK-IN ANTECIPADO — formulário público (/check-in)
 ====================================================== */
 .checkin-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 100vh;
+  overflow-y: auto;
   background: var(--bg-page);
   padding: 24px 16px;
 }
 
 .checkin-card {
+  position: relative;
   width: 100%;
   max-width: 420px;
+  margin: 0 auto;
   background: var(--card-bg);
   border-radius: 16px;
   padding: 28px 26px;
@@ -6892,6 +6892,16 @@ body.dark .app-topbar {
   gap: 18px;
 }
 
+.checkin-theme-wrapper {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .checkin-brand {
   display: flex;
   align-items: center;
@@ -6899,6 +6909,7 @@ body.dark .app-topbar {
   font-weight: 800;
   font-size: 17px;
   color: var(--text-main);
+  padding-right: 48px;
 }
 
 .checkin-logo {
