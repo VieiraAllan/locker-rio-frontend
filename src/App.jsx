@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import LoginPage from './pages/LoginPage';
+import CheckInPage from './pages/CheckInPage';
 import LockersPage from './pages/LockersPage';
 import LocacoesAtivasPage from './pages/LocacoesAtivasPage';
 import HistoricoPage from './pages/HistoricoPage';
@@ -189,6 +190,10 @@ function App() {
     setPaginaAtual(paginas.PAINEL);
     setMenuOpen(false);
     showToast('Sessão encerrada com sucesso.', 'success');
+  }
+
+  if (window.location.pathname === '/check-in') {
+    return <CheckInPage />;
   }
 
   if (carregandoSessao) {
