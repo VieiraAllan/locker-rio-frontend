@@ -7015,30 +7015,6 @@ body.dark .app-topbar {
   outline-offset: 1px;
 }
 
-.checkin-stepper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.checkin-stepper button {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  border: 1px solid var(--input-border);
-  background: var(--input-bg);
-  color: var(--text-main);
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.checkin-stepper output {
-  font-weight: 700;
-  min-width: 20px;
-  text-align: center;
-  color: var(--text-main);
-}
-
 .checkin-sem-preco {
   display: flex;
   align-items: center;
@@ -7057,6 +7033,41 @@ body.dark .app-topbar {
   border-radius: 50%;
   background: var(--accent);
   flex-shrink: 0;
+}
+
+.checkin-termos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.checkin-termos-titulo {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-main);
+  opacity: 0.65;
+}
+
+.checkin-termos ol {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkin-termos li {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-main);
+  opacity: 0.8;
 }
 
 .checkin-consentimento {
