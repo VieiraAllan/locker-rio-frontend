@@ -195,7 +195,12 @@ function App() {
   const caminhoAtual = window.location.pathname.replace(/\/+$/, '') || '/';
 
   if (caminhoAtual === '/check-in') {
-    return <CheckInPage />;
+    return (
+      <CheckInPage
+        darkMode={darkMode}
+        toggleDarkMode={toggleDarkMode}
+      />
+    );
   }
 
   if (carregandoSessao) {
