@@ -979,7 +979,7 @@ function LockersPage({ showToast, usuarioAtual }) {
                 </div>
                 <strong className="pre-cadastro-nome">{preCadastro.cliente_nome}</strong>
                 <span className="pre-cadastro-meta">
-                  {preCadastro.quantidade_volumes} volume{preCadastro.quantidade_volumes === 1 ? '' : 's'}
+                  Recebido às {new Date(preCadastro.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   {preCadastro.observacao_cliente ? ` · ${preCadastro.observacao_cliente}` : ''}
                 </span>
                 <div className="pre-cadastro-acoes">

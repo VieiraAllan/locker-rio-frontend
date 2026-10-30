@@ -12,11 +12,19 @@ const TEXTOS = {
     phTelefone: '+55 21 99999-9999',
     documento: 'Documento',
     phDocumento: 'RG, CPF ou passaporte',
-    volumes: 'Quantidade de volumes',
     observacao: 'Observação para a equipe (opcional)',
     phObservacao: 'Ex.: uma das malas tem item frágil',
-    semPreco: 'O valor será informado pela equipe no atendimento.',
-    consentimento: 'Declaro que os dados informados estão corretos e autorizo seu uso para realização do atendimento.',
+    semPreco: 'O valor será informado pela equipe no atendimento, de acordo com a quantidade de lockers necessária.',
+    tituloTermos: 'Termos e condições de uso',
+    termos: [
+      'A Locker Rio disponibiliza o(s) locker(s) identificado(s) para guarda de volumes durante o período contratado.',
+      'O cliente declara que irá receber a(s) chave(s) e está ciente de que somente com a chave é possível abrir o locker.',
+      'A perda ou extravio da chave poderá gerar cobrança adicional referente à substituição e/ou abertura do locker.',
+      'Após o horário contratado, pode ser cobrado valor adicional por hora excedente, conforme tabela vigente.',
+      'A Locker Rio não se responsabiliza por objetos de alto valor deixados no interior do locker.',
+      'O horário de funcionamento é das 09h às 18h, com tolerância de 30 minutos; após este período, a retirada poderá ocorrer no dia seguinte, mediante multa.'
+    ],
+    consentimento: 'Declaro que os dados informados estão corretos e que li e aceito os termos e condições de uso acima.',
     enviar: 'Enviar pré-cadastro',
     enviando: 'Enviando...',
     okTitulo: 'Pré-cadastro recebido',
@@ -33,11 +41,19 @@ const TEXTOS = {
     phTelefone: '+1 555 123 4567',
     documento: 'ID document',
     phDocumento: 'Passport or ID number',
-    volumes: 'Number of bags',
     observacao: 'Note for staff (optional)',
     phObservacao: 'E.g.: one bag has a fragile item',
-    semPreco: 'Staff will let you know the price when you check in.',
-    consentimento: 'I confirm the information above is correct and can be used to process my check-in.',
+    semPreco: 'Staff will let you know the price when you check in, based on how many lockers you need.',
+    tituloTermos: 'Terms and conditions of use',
+    termos: [
+      'Locker Rio provides the identified locker(s) for storing your belongings during the contracted period.',
+      'The customer confirms they will receive the key(s) and understands that only the key opens the locker.',
+      'A lost or missing key may result in an additional charge for replacement and/or opening the locker.',
+      'After the contracted time, an additional fee per extra hour may apply, according to the current rate table.',
+      'Locker Rio is not responsible for high-value items left inside the locker.',
+      'Business hours are 9am to 6pm, with a 30-minute grace period; after that, pickup may happen the next day, subject to a late fee.'
+    ],
+    consentimento: 'I confirm the information above is correct and that I have read and accept the terms and conditions above.',
     enviar: 'Send check-in',
     enviando: 'Sending...',
     okTitulo: 'Check-in received',
@@ -54,11 +70,19 @@ const TEXTOS = {
     phTelefone: '+54 9 11 1234-5678',
     documento: 'Documento',
     phDocumento: 'DNI, cédula o pasaporte',
-    volumes: 'Cantidad de bultos',
     observacao: 'Observación para el equipo (opcional)',
     phObservacao: 'Ej.: una maleta tiene un objeto frágil',
-    semPreco: 'El equipo te informará el valor al momento de la atención.',
-    consentimento: 'Declaro que los datos indicados son correctos y autorizo su uso para realizar la atención.',
+    semPreco: 'El equipo te informará el valor al momento de la atención, según la cantidad de casilleros necesaria.',
+    tituloTermos: 'Términos y condiciones de uso',
+    termos: [
+      'Locker Rio pone a disposición el/los casillero(s) identificado(s) para guardar objetos durante el período contratado.',
+      'El cliente declara que recibirá la(s) llave(s) y sabe que solo con la llave se puede abrir el casillero.',
+      'La pérdida de la llave puede generar un cargo adicional por reposición y/o apertura del casillero.',
+      'Después del horario contratado, se puede cobrar un valor adicional por hora excedente, según la tabla vigente.',
+      'Locker Rio no se responsabiliza por objetos de alto valor dejados dentro del casillero.',
+      'El horario de atención es de 9h a 18h, con 30 minutos de tolerancia; después de eso, el retiro puede hacerse al día siguiente, con multa.'
+    ],
+    consentimento: 'Declaro que los datos indicados son correctos y que leí y acepto los términos y condiciones anteriores.',
     enviar: 'Enviar registro',
     enviando: 'Enviando...',
     okTitulo: 'Registro recibido',
@@ -73,7 +97,6 @@ function CheckInPage() {
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
   const [documento, setDocumento] = useState('');
-  const [volumes, setVolumes] = useState(1);
   const [observacao, setObservacao] = useState('');
   const [consentimento, setConsentimento] = useState(false);
   const [enviando, setEnviando] = useState(false);
@@ -87,7 +110,6 @@ function CheckInPage() {
     setNome('');
     setTelefone('');
     setDocumento('');
-    setVolumes(1);
     setObservacao('');
     setConsentimento(false);
     setErro('');
@@ -110,7 +132,6 @@ function CheckInPage() {
         cliente_telefone: telefone.trim(),
         cliente_documento: documento.trim(),
         idioma,
-        quantidade_volumes: volumes,
         observacao_cliente: observacao.trim()
       });
 
@@ -196,27 +217,6 @@ function CheckInPage() {
             </label>
 
             <label className="checkin-campo">
-              <span>{t.volumes}</span>
-              <div className="checkin-stepper">
-                <button
-                  type="button"
-                  onClick={() => setVolumes(v => Math.max(1, v - 1))}
-                  disabled={enviando}
-                >
-                  −
-                </button>
-                <output>{volumes}</output>
-                <button
-                  type="button"
-                  onClick={() => setVolumes(v => Math.min(20, v + 1))}
-                  disabled={enviando}
-                >
-                  +
-                </button>
-              </div>
-            </label>
-
-            <label className="checkin-campo">
               <span>{t.observacao}</span>
               <textarea
                 value={observacao}
@@ -231,6 +231,15 @@ function CheckInPage() {
             <div className="checkin-sem-preco">
               <span className="checkin-dot" />
               <span>{t.semPreco}</span>
+            </div>
+
+            <div className="checkin-termos">
+              <span className="checkin-termos-titulo">{t.tituloTermos}</span>
+              <ol>
+                {t.termos.map((termo, indice) => (
+                  <li key={indice}>{termo}</li>
+                ))}
+              </ol>
             </div>
 
             <label className="checkin-consentimento">
