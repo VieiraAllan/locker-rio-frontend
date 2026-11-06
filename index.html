@@ -27,6 +27,28 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
+    <script>
+      (function () {
+        var erros = [];
+        window.onerror = function (msg, src, linha, coluna) {
+          erros.push(String(msg) + ' (' + String(src).split('/').pop() + ':' + linha + ':' + coluna + ')');
+        };
+        window.addEventListener('load', function () {
+          setTimeout(function () {
+            var root = document.getElementById('root');
+            if (!root || root.childNodes.length > 0) return;
+            var caixa = document.createElement('div');
+            caixa.setAttribute('style', 'margin:24px 16px;padding:16px;background:#fff;color:#222;font:14px sans-serif;border-radius:12px;word-wrap:break-word');
+            caixa.appendChild(document.createTextNode(
+              'Não foi possível carregar a página neste navegador. Envie um print desta tela para o suporte. ' +
+              (erros.length ? 'Erro: ' + erros.join(' | ') : 'Nenhum erro registrado.') +
+              ' Navegador: ' + navigator.userAgent
+            ));
+            document.body.insertBefore(caixa, document.body.firstChild);
+          }, 5000);
+        });
+      })();
+    </script>
   </head>
 
   <body>
