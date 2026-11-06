@@ -7,7 +7,10 @@ export default defineConfig({
   plugins: [
     react(),
     legacy({
-      targets: ['defaults', 'iOS >= 10', 'Safari >= 10'],
+      targets: ['defaults', 'iOS >= 8', 'Safari >= 8'],
     }),
   ],
+  build: {
+    minify: 'terser',
+  },
 })
