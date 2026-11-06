@@ -36,6 +36,7 @@
         window.addEventListener('load', function () {
           setTimeout(function () {
             var root = document.getElementById('root');
+            if (!/[?&]diagnostico=1(&|$)/.test(window.location.search)) return;
             if (!root || root.childNodes.length > 0) return;
             var caixa = document.createElement('div');
             caixa.setAttribute('style', 'margin:24px 16px;padding:16px;background:#fff;color:#222;font:14px sans-serif;border-radius:12px;word-wrap:break-word');
